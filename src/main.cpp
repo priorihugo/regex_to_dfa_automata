@@ -88,7 +88,179 @@ void salvarTags(vector<Tag> tags, string output_file)
         cout << "[INFO] Nenhuma definicao de tag foi carregada. Execute o comando :c para carrega-las. " << endl;
     }
 }
+///////
+bool validaExpressao(string exp)
+{
+    vector<string> heap;
+    for (int i = 0; i < exp.length(); i++)
+    {
+        string op1 = "", op2 = "", resultado = "";
+        /// faixa de simbolos validos
+        if (int(exp[i] >= 32 && int(exp[i]) <= 126))
+        {
+            switch (exp[i])
+            {
+            case ' ':
+                continue;
+                break;
+            case '+':
+                if (heap.size() >= 2)
+                {
+                    op1 = heap.back();
+                    cout << "op1: " << op1 << endl;
+                    heap.pop_back();
+                    op2 = heap.back();
+                    cout << "op2: " << op2 << endl;
+                    heap.pop_back();
+                    resultado.push_back('(');
+                    resultado.append(op2);
+                    resultado.push_back('+');
+                    resultado.append(op1);
+                    resultado.push_back(')');
+                    heap.push_back(resultado);
+                }
+                else
+                {
+                    return false;
+                }
+                break;
+            case '.':
+                if (heap.size() >= 2)
+                {
+                    op1 = heap.back();
+                    cout << "op1: " <<  op1 << endl;
+                    heap.pop_back();
+                    op2 = heap.back();
+                    cout << "op2: " << op2 << endl;
+                    heap.pop_back();
 
+                    resultado.push_back('(');
+                    resultado.append(op2);
+                    resultado.push_back(' ');
+                    resultado.append(op1);
+                    resultado.push_back(')');
+                    heap.push_back(resultado);
+                }
+                else
+                {
+                    return false;
+                }
+                break;
+            case '*':
+                if (heap.size() >= 1)
+                {
+                    op1 = heap.back();
+                    cout << "op1: " << op1 << endl;
+                    heap.pop_back();
+
+                    resultado.append(op1);
+                    resultado.push_back('*');
+                    heap.push_back(resultado);
+                }
+                else
+                {
+                    return false;
+                }
+                break;
+            default:
+                resultado = "";
+                resultado.push_back(exp[i]);
+                heap.push_back(resultado);
+                break;
+            }
+        }
+        else
+        {
+            resultado = "";
+            cout << "caractere invalido" << endl;
+        }
+    }
+    if (heap.size() == 1)
+    {
+        cout << heap[0] << endl;
+        return true;
+    }
+    else
+    {
+        cout << "expressao invalida" << endl;
+        return false;
+    }
+}
+///essa ultima função foi uma tentativa que quebrar as entradas
+/*
+void classificaString(vector<string> strArray)
+{
+
+    /// esse vector que vem da função esta com as linhas separadas do arquivo texto
+    /// estou fazendo o teste so usando a primeira linha que vem;
+    /// o codigo ta bem feio, mas tentei criar uma logica de estados
+    int t = strArray.size();
+    cout << "Tamanho do array: " << t << endl;
+    string line = strArray[0];
+    vector<string> resultado;
+    string currentState = "start";
+    for (int i = 0; i < strArray[0].length(); i++)
+    {
+        if (int(line[i]) >= 65 && int(line[i]) <= 122)
+        {
+            if (currentState.compare("start") == 0)
+            {
+                currentState = "var";
+            }
+        }
+        if (int(line[i]) >= 48 && int(line[i] <= 57))
+        {
+            if (currentState.compare("start") == 0)
+            {
+                currentState = "number";
+            }
+        }
+        if (int(line[i] == 32))
+        {
+            if (currentState.compare("start") == 0)
+            {
+                resultado.push_back("space");
+            }
+            else if (currentState.compare("comment") == 0)
+            {
+            }
+            else
+            {
+                resultado.push_back(currentState);
+                currentState = "start";
+                resultado.push_back("space");
+            }
+        }
+        if (int(line[i]) == 61)
+        {
+            if (currentState.compare("start") == 0)
+            {
+                resultado.push_back("equals");
+            }
+            else if (currentState.compare("comment") == 0)
+            {
+                // faz nada, ainda pra implementar
+            }
+            else
+            {
+                resultado.push_back(currentState);
+                currentState = "start";
+                resultado.push_back("equals");
+            }
+        }
+    }
+
+    vector<string>::iterator it;
+
+    cout << line << endl;
+
+    for (it = resultado.begin(); it != resultado.end(); it++)
+    {
+        cout << *it << " ";
+    }
+    cout << endl;
+}
+*/
 void menu()
 {
     cout << endl;

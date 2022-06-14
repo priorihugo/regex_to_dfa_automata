@@ -261,6 +261,37 @@ void classificaString(vector<string> strArray)
     cout << endl;
 }
 */
+//
+// Função para dividir nome da tag e expressao.
+vector<Tag> divideTag(vector<string> input_tags, vector<Tag> tagsValidas)
+{
+    for (int i = 0; i < input_tags.size(); i++)
+    {
+        size_t pos;
+        string delimiter = ": ";
+        string str_auxNome = "";
+
+        while ((pos = input_tags[i].find(delimiter)) != string::npos)
+        {
+            // Separando nome da tag e sua expressao.
+            str_auxNome = input_tags[i].substr(0, pos);
+            input_tags[i].erase(0, pos + delimiter.length());
+            // Valida expressao da tag que ficou na string.
+            bool aux = validaExpressao(input_tags[i]);
+
+            // Se expressao for valida inserimos ela no vetor tagsValidas.
+            if (aux)
+            {
+                Tag tag;
+                tag.nome = str_auxNome;
+                tag.expressao = input_tags[i];
+                tagsValidas.push_back(tag);
+            }
+        }
+    }
+    return tagsValidas;
+}
+//
 void menu()
 {
     cout << endl;
@@ -284,7 +315,7 @@ int main()
     string delimiter = " ";
 
     // Vetor de Tags quer armazena tags validas.
-    //vector<Tag> tagsValidas;
+    vector<Tag> tagsValidas;
 
     vector<string> input_string;
     vector<string> input_tags;
@@ -333,7 +364,7 @@ int main()
             break;
         case 'c':
             input_tags = leArquivo(aux[1]);
-            //tagsValidas = divideTag(input_tags, tagsValidas);
+            tagsValidas = divideTag(input_tags, tagsValidas);
             break;
         case 'o':
             cout << "[WARNING] Funcionalidade nao implementada." << endl;
@@ -349,7 +380,7 @@ int main()
             //listaTags(tagsValidas);
             break;
         case 's':
-            //salvarTags(tagsValidas, aux[1]);
+            salvarTags(tagsValidas, aux[1]);
             break;
         case 'q':
             cout << "[INFO] Encerrando Programa." << endl;

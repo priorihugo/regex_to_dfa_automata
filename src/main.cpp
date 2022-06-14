@@ -292,6 +292,22 @@ vector<Tag> divideTag(vector<string> input_tags, vector<Tag> tagsValidas)
     return tagsValidas;
 }
 //
+void listaTags(vector<Tag> tags)
+{
+    if (!tags.empty())
+    {
+        cout << endl;
+        for (vector<Tag>::iterator it = tags.begin(); it != tags.end(); it++)
+        {
+            cout << it->nome << ": " << it->expressao << endl;
+        }
+    }
+    else
+    {
+        cout << "[INFO] Nenhuma definicao de tag foi carregada. Execute o comando :c para carrega-las. " << endl;
+    }
+}
+//
 void menu()
 {
     cout << endl;

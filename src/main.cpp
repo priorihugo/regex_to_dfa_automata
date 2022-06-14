@@ -39,6 +39,36 @@ int main()
         menu();
         getline(cin, opcao);
 
+        // Dividindo a string opcao.
+        size_t pos;
+
+        while ((pos = opcao.find(delimiter)) != string::npos)
+        {
+            aux.push_back(opcao.substr(0, pos));
+            opcao.erase(0, pos + delimiter.length());
+        }
+        aux.push_back(opcao);
+        opcao = "";
+
+        // Tratando erros de entrada.
+        // Verifica se opcao foi passada por parametro no formato ":x".
+        if (aux[0].size() != 2 && aux[0].at(0) != ':')
+        {
+            cout << "[ERROR] Erro no comando de entrada." << endl;
+            exit(1);
+        }
+
+        // Verifica se usuario passou 2 parametro de entrada.
+        // Algumas opcoes sao excecao por terem apenas 1 parametro.
+        if (aux[0] != ":q" && aux[0] != ":l" && aux[0] != ":a")
+        {
+            if (aux.size() != 2)
+            {
+                cout << "[ERROR] Dados de entrada incorretos." << endl;
+                exit(1);
+            }
+        }
+
         switch (aux[0].at(1))
         {
         case 'd':

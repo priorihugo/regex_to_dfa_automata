@@ -6,6 +6,12 @@
 
 using namespace std;
 
+struct Tag
+{
+    string nome;
+    string expressao;
+};
+
 // Ler arquivo.
 vector<string> leArquivo(string arquivo)
 {

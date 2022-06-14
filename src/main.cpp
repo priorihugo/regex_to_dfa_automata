@@ -107,11 +107,10 @@ bool validaExpressao(string exp)
                 if (heap.size() >= 2)
                 {
                     op1 = heap.back();
-                    cout << "op1: " << op1 << endl;
                     heap.pop_back();
                     op2 = heap.back();
-                    cout << "op2: " << op2 << endl;
                     heap.pop_back();
+
                     resultado.push_back('(');
                     resultado.append(op2);
                     resultado.push_back('+');
@@ -128,15 +127,33 @@ bool validaExpressao(string exp)
                 if (heap.size() >= 2)
                 {
                     op1 = heap.back();
-                    cout << "op1: " <<  op1 << endl;
                     heap.pop_back();
                     op2 = heap.back();
-                    cout << "op2: " << op2 << endl;
                     heap.pop_back();
 
                     resultado.push_back('(');
                     resultado.append(op2);
-                    resultado.push_back(' ');
+                    resultado.push_back('.');
+                    resultado.append(op1);
+                    resultado.push_back(')');
+                    heap.push_back(resultado);
+                }
+                else
+                {
+                    return false;
+                }
+                break;
+            case '/':
+            if (heap.size() >= 2)
+                {
+                    op1 = heap.back();
+                    heap.pop_back();
+                    op2 = heap.back();
+                    heap.pop_back();
+
+                    resultado.push_back('(');
+                    resultado.append(op2);
+                    resultado.push_back('/');
                     resultado.append(op1);
                     resultado.push_back(')');
                     heap.push_back(resultado);
@@ -150,7 +167,6 @@ bool validaExpressao(string exp)
                 if (heap.size() >= 1)
                 {
                     op1 = heap.back();
-                    cout << "op1: " << op1 << endl;
                     heap.pop_back();
 
                     resultado.append(op1);
@@ -172,17 +188,17 @@ bool validaExpressao(string exp)
         else
         {
             resultado = "";
-            cout << "caractere invalido" << endl;
+            cout << "[INFO] Caractere " << exp[i] << " invalido" << endl;
+            return false;
         }
     }
     if (heap.size() == 1)
     {
-        cout << heap[0] << endl;
         return true;
     }
     else
     {
-        cout << "expressao invalida" << endl;
+        cout << "[INFO] Expressao " << exp <<  " invalida" << endl;
         return false;
     }
 }

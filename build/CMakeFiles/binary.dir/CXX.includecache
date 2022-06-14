@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/mnt/c/Users/jaque/OneDrive/Documentos/Visual Studio Code/tabalho_dcc146/src/main.cpp
+iostream
+-
+fstream
+-
+string
+-
+vector
+-
+stack
+-
+

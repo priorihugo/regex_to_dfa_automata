@@ -393,7 +393,7 @@ int main()
             break;
         case 'l':
             // Lista todas as definicoes das tags validas.
-            //listaTags(tagsValidas);
+            listaTags(tagsValidas);
             break;
         case 's':
             salvarTags(tagsValidas, aux[1]);

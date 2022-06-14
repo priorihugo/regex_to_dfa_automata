@@ -54,6 +54,29 @@ vector<string> leArquivo(string arquivo)
     return aux;
 }
 
+void escreveArquivoTags(string arquivo, vector<Tag> tags)
+{
+    ofstream output_file;
+    output_file.open("../output/" + arquivo, ios::out);
+
+    // Verifica se arquivo foi aberto.
+    if (!output_file.is_open())
+    {
+        cout << "[ERROR] Nao foi possivel abrir arquivo." << endl;
+        exit(2);
+    }
+
+    for (vector<Tag>::iterator it = tags.begin(); it != tags.end(); it++)
+    {
+        output_file << it->nome << ": " << it->expressao << endl;
+    }
+
+    cout << "[INFO] Tags salvas no arquivo " << arquivo << endl;
+
+    // Fecha arquivo.
+    output_file.close();
+}
+
 void menu()
 {
     cout << endl;

@@ -1,0 +1,3 @@
+/mnt/c/Users/jaque/OneDrive/Documentos/Visual Studio Code/tabalho_dcc146/build/CMakeFiles/rebuild_cache.dir
+/mnt/c/Users/jaque/OneDrive/Documentos/Visual Studio Code/tabalho_dcc146/build/CMakeFiles/edit_cache.dir
+/mnt/c/Users/jaque/OneDrive/Documentos/Visual Studio Code/tabalho_dcc146/build/CMakeFiles/binary.dir

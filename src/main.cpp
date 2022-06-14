@@ -77,6 +77,18 @@ void escreveArquivoTags(string arquivo, vector<Tag> tags)
     output_file.close();
 }
 
+void salvarTags(vector<Tag> tags, string output_file)
+{
+    if (!tags.empty())
+    {
+        escreveArquivoTags(output_file, tags);
+    }
+    else
+    {
+        cout << "[INFO] Nenhuma definicao de tag foi carregada. Execute o comando :c para carrega-las. " << endl;
+    }
+}
+
 void menu()
 {
     cout << endl;

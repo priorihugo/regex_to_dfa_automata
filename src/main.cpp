@@ -41,12 +41,6 @@ vector<string> leArquivo(string arquivo)
         cout << "[WARNING] Nunhuma string foi carregada do arquivo." << endl;
     }
 
-    // Imprimindo strings para teste.
-    // cout << endl;
-    // for (vector<string>::iterator it = aux.begin(); it != aux.end(); it++)
-    // {
-    //     cout << *it << endl;
-    // }
     cout << "[INFO] Arquivo carregado." << endl;
 
     // Fecha arquivo.
@@ -71,12 +65,13 @@ void escreveArquivoTags(string arquivo, vector<Tag> tags)
         output_file << it->nome << ": " << it->expressao << endl;
     }
 
-    cout << "[INFO] Tags salvas no arquivo " << arquivo << endl;
+    cout << "[INFO] Tags salvas no arquivo." << arquivo << endl;
 
     // Fecha arquivo.
     output_file.close();
 }
 
+// Salva tags validas em arquivo.
 void salvarTags(vector<Tag> tags, string output_file)
 {
     if (!tags.empty())
@@ -88,7 +83,7 @@ void salvarTags(vector<Tag> tags, string output_file)
         cout << "[INFO] Nenhuma definicao de tag foi carregada. Execute o comando :c para carrega-las. " << endl;
     }
 }
-///////
+
 bool validaExpressao(string exp)
 {
     vector<string> heap;
@@ -188,7 +183,7 @@ bool validaExpressao(string exp)
         else
         {
             resultado = "";
-            cout << "[INFO] Caractere " << exp[i] << " invalido" << endl;
+            cout << "[INFO] Caractere " << exp[i] << " invalido." << endl;
             return false;
         }
     }
@@ -198,7 +193,7 @@ bool validaExpressao(string exp)
     }
     else
     {
-        cout << "[INFO] Expressao " << exp <<  " invalida" << endl;
+        cout << "[INFO] Expressao " << exp <<  " invalida." << endl;
         return false;
     }
 }
@@ -278,6 +273,21 @@ void classificaString(vector<string> strArray)
 }
 */
 //
+
+// Verifica se já existe uma tag valida com o nome da tag que esta sendo lida.
+bool validaNomeTag(string nomeTag, vector<Tag> tagsValidas)
+{
+    for(int i = 0; i < tagsValidas.size(); i++)
+    {
+        if(nomeTag == tagsValidas[i].nome)
+        {
+            cout << "[WARNING] Ja existe tag com o nome " << nomeTag << "." << endl;
+            return true;
+        }
+    }
+    return false;
+}
+
 // Função para dividir nome da tag e expressao.
 vector<Tag> divideTag(vector<string> input_tags, vector<Tag> tagsValidas)
 {
@@ -292,16 +302,21 @@ vector<Tag> divideTag(vector<string> input_tags, vector<Tag> tagsValidas)
             // Separando nome da tag e sua expressao.
             str_auxNome = input_tags[i].substr(0, pos);
             input_tags[i].erase(0, pos + delimiter.length());
-            // Valida expressao da tag que ficou na string.
-            bool aux = validaExpressao(input_tags[i]);
 
-            // Se expressao for valida inserimos ela no vetor tagsValidas.
-            if (aux)
+            // Verifica se nome da tag é valido. (true = o nome ja existe)
+            if(!validaNomeTag(str_auxNome, tagsValidas))
             {
-                Tag tag;
-                tag.nome = str_auxNome;
-                tag.expressao = input_tags[i];
-                tagsValidas.push_back(tag);
+                // Valida expressao da tag que ficou na string.
+                bool aux = validaExpressao(input_tags[i]);
+
+                // Se expressao for valida inserimos ela no vetor tagsValidas.
+                if (aux)
+                {
+                    Tag tag;
+                    tag.nome = str_auxNome;
+                    tag.expressao = input_tags[i];
+                    tagsValidas.push_back(tag);
+                }
             }
         }
     }
@@ -352,9 +367,11 @@ int main()
     vector<string> input_string;
     vector<string> input_tags;
 
+    menu();
+
     do
     {
-        menu();
+        cout << endl;
         getline(cin, opcao);
 
         // Dividindo a string opcao.
@@ -418,7 +435,7 @@ int main()
             cout << "[INFO] Encerrando Programa." << endl;
             break;
         default:
-            cout << "Opcao Invalida" << endl;
+            cout << "[WARNING] Opcao Invalida." << endl;
             break;
         }
         aux.clear();

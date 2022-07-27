@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <stack>
+#include <algorithm>
 
 using namespace std;
 
@@ -11,7 +12,6 @@ struct Tag
     string nome;
     string expressao;
 };
-
 // Ler arquivo.
 vector<string> leArquivo(string arquivo)
 {
@@ -71,6 +71,14 @@ void escreveArquivoTags(string arquivo, vector<Tag> tags)
     output_file.close();
 }
 
+vector<Tag> concatenaVetores(vector<Tag> tags, vector<Tag> tagsValidas)
+{
+    for(int i = 0; i < tags.size(); i++)
+    {
+        tagsValidas.push_back(tags[i]);
+    }
+    return tagsValidas;
+}
 // Salva tags validas em arquivo.
 void salvarTags(vector<Tag> tags, string output_file)
 {
@@ -80,7 +88,7 @@ void salvarTags(vector<Tag> tags, string output_file)
     }
     else
     {
-        cout << "[INFO] Nenhuma definicao de tag foi carregada. Execute o comando :c para carrega-las. " << endl;
+        cout << "[INFO] Nenhuma definicao de tag foi carregada. Execute o comando :c ou :e para carrega-las. " << endl;
     }
 }
 
@@ -273,21 +281,27 @@ void classificaString(vector<string> strArray)
 }
 */
 //
-
 // Verifica se já existe uma tag valida com o nome da tag que esta sendo lida.
 bool validaNomeTag(string nomeTag, vector<Tag> tagsValidas)
 {
+    // Funcao faz copia das variaveis.
+    string str_temp = "";
+    string str_name = nomeTag;
+    // Transforma temporariamente o nome da tag em letras minusculas.
+    transform(str_name.begin(), str_name.end(), str_name.begin(), ::tolower);
     for(int i = 0; i < tagsValidas.size(); i++)
     {
-        if(nomeTag == tagsValidas[i].nome)
+        str_temp = tagsValidas[i].nome;
+        transform(str_temp.begin(), str_temp.end(), str_temp.begin(), ::tolower);
+        
+        if(str_name == str_temp)
         {
-            cout << "[WARNING] Ja existe tag com o nome " << nomeTag << "." << endl;
+            cout << "[WARNING] Tag \"" << nomeTag << "\" nao sera salva pois ja existe outra com mesmo nome." << endl;
             return true;
         }
     }
     return false;
 }
-
 // Função para dividir nome da tag e expressao.
 vector<Tag> divideTag(vector<string> input_tags, vector<Tag> tagsValidas)
 {
@@ -313,6 +327,8 @@ vector<Tag> divideTag(vector<string> input_tags, vector<Tag> tagsValidas)
                 if (aux)
                 {
                     Tag tag;
+                    // Formata todos os nomes de tag em letras maiusculas.
+                    transform(str_auxNome.begin(), str_auxNome.end(), str_auxNome.begin(), ::toupper);
                     tag.nome = str_auxNome;
                     tag.expressao = input_tags[i];
                     tagsValidas.push_back(tag);
@@ -335,15 +351,41 @@ void listaTags(vector<Tag> tags)
     }
     else
     {
-        cout << "[INFO] Nenhuma definicao de tag foi carregada. Execute o comando :c para carrega-las. " << endl;
+        cout << "[INFO] Nenhuma definicao de tag foi carregada. Execute o comando :c ou :e para carrega-las. " << endl;
     }
 }
-//
+// Ler tags via terminal.
+vector<Tag> lerTagsTerminal(vector<Tag> tagsValidas)
+{
+    vector<string> tags;
+    string temp;
+    int quantTags = 0;
+
+    cout << "Quantas tags serao listadas?" << endl;
+    cin >> quantTags;
+
+    if(quantTags < 0) 
+        cout << "[WARNING] Valor invalido." << endl;
+
+    cout << endl << "[INFO] Digite as definicoes de Tag abaixo." << endl;
+
+    for(int i = 0; i <= quantTags; i++)
+    {
+        getline(cin, temp);
+        tags.push_back(temp);
+    }
+    
+    tagsValidas = divideTag(tags, tagsValidas);
+    cout << "[INFO] Tags carregadas." << endl;
+    return tagsValidas;
+}
+
 void menu()
 {
     cout << endl;
     cout << ":d -> Dividir em tags a string do arquivo informado" << endl;
     cout << ":c -> Carregar um arquivo com definicoes de tags" << endl;
+    cout << ":e -> Definir tags" << endl;
     cout << ":o -> Especificar o caminho do arquivo de saida para a divisao em tags" << endl;
     cout << ":p -> Realizar a divisao em tags da entrada informada" << endl;
     cout << ":a -> Listar as definicoes formais dos automatos em memoria" << endl;
@@ -367,6 +409,10 @@ int main()
     vector<string> input_string;
     vector<string> input_tags;
 
+    // Vetor temporario para receber retorno de funcao 
+    // quando tag é lida via terminal.
+    vector<Tag> temp;
+
     menu();
 
     do
@@ -389,13 +435,13 @@ int main()
         // Verifica se opcao foi passada por parametro no formato ":x".
         if (aux[0].size() != 2 && aux[0].at(0) != ':')
         {
-            cout << "[ERROR] Erro no comando de entrada." << endl;
+            cout << "[ERROR] Erro no formato do comando de entrada." << endl;
             exit(1);
         }
 
         // Verifica se usuario passou 2 parametro de entrada.
         // Algumas opcoes sao excecao por terem apenas 1 parametro.
-        if (aux[0] != ":q" && aux[0] != ":l" && aux[0] != ":a")
+        if (aux[0] != ":q" && aux[0] != ":l" && aux[0] != ":a" && aux[0] != ":e")
         {
             if (aux.size() != 2)
             {
@@ -413,7 +459,15 @@ int main()
             break;
         case 'c':
             input_tags = leArquivo(aux[1]);
-            tagsValidas = divideTag(input_tags, tagsValidas);
+            // Funcao de dividir chama a de validar a tag.
+            temp.clear();
+            temp = divideTag(input_tags, tagsValidas);
+            tagsValidas = concatenaVetores(temp, tagsValidas);
+            break;
+        case 'e':
+            temp.clear();
+            temp = lerTagsTerminal(tagsValidas);
+            tagsValidas = concatenaVetores(temp, tagsValidas);
             break;
         case 'o':
             cout << "[WARNING] Funcionalidade nao implementada." << endl;

@@ -1,4 +1,7 @@
 #include "Automato.h"
+#include <iostream>
+
+using namespace std;
 
 Automato::Automato()
 {
@@ -29,11 +32,28 @@ void linkVectorEstadosParaEstado(vector<Estado *> &v, Estado *e, char c)
     }
 }
 void copiaVectorParaVector(vector<Estado *> &v1 , vector<Estado *> &v2){
-
     for(vector<Estado * >::iterator it = v1.begin() ; it != v1.end() ; it ++){
         v2.push_back((*it));
     }
+}
+void fechoLambdaHelper(Estado* e , vector<Estado* > &v){
 
+    for (vector<Transicao* >::iterator it = e->transicoes.begin(); it != e->transicoes.end(); it++)
+    {
+        if((*it)->tipo == '~'){
+            fechoLambdaHelper((*it)->destino , v);
+            v.push_back((*it)->destino);
+        }
+    } 
+}
+void fechoLambda(Estado* e){
+    vector<Estado* > v;
+
+    fechoLambdaHelper(e , v);
+    cout << "[teste fecho lambda ~ de "<< e->id << " ]" << endl;
+    for(vector<Estado*>::iterator it = v.begin(); it != v.end() ; it++){
+        cout << (*it)->id << endl;
+    }
 }
 void Automato::criaAutomato(string exp)
 {
@@ -88,10 +108,6 @@ void Automato::criaAutomato(string exp)
                     // joga aux na heap
                     heap.push_back(aux);
 
-                    string name = "teste" + counter;
-                    counter++;
-                    aux->criaVisualizacao(name);
-
                     // delete na referencia para os 2 automatos anteriores
                     delete A1;
                     delete A2;
@@ -121,10 +137,6 @@ void Automato::criaAutomato(string exp)
                     delete A1;
                     delete A2;
 
-                    string name = "teste" + counter;
-                    counter++;
-                    aux->criaVisualizacao(name);
-
                 }
                 break;
             case '*':
@@ -144,6 +156,9 @@ void Automato::criaAutomato(string exp)
                     copiaVectorParaVector(A1->Estados , aux->Estados);
                     copiaVectorParaVector(A1->EstadosIniciais , aux->EstadosIniciais);
                     copiaVectorParaVector(A1->EstadosFinais , aux->EstadosFinais);
+
+                    heap.push_back(aux);
+                    delete A1;
                     
                 }
                 break;
@@ -207,6 +222,7 @@ void Automato::criaVisualizacao(string name)
 
     for (vector<Estado *>::iterator estado = this->Estados.begin(); estado != this->Estados.end(); estado++)
     {
+        fechoLambda((*estado));
 #define V (*estado)->transicoes
         for (vector<Transicao *>::iterator transicao = V.begin(); transicao != V.end(); transicao++)
         {

@@ -13,7 +13,7 @@ int main(){
     ofstream out;
     //out.open("TESTE.dot");
 
-    a.criaAutomato("ab+");
+    a.criaAutomato("aa+b+c+");
     a.criaVisualizacao(out);
 
     return 0;

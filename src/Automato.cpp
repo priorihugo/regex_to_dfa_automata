@@ -7,7 +7,34 @@ Automato::Automato()
 Automato::~Automato()
 {
 }
+void linkEstadoParaVectorEstados(Estado *e, vector<Estado *> &v, char c)
+{
 
+    for (vector<Estado *>::iterator it = v.begin(); it != v.end(); it++)
+    {
+        Transicao *t = new Transicao();
+        t->destino = (*it);
+        t->tipo = c;
+        e->transicoes.push_back(t);
+    }
+}
+void linkVectorEstadosParaEstado(vector<Estado *> &v, Estado *e, char c)
+{
+    for (vector<Estado *>::iterator it = v.begin(); it != v.end(); it++)
+    {
+        Transicao *t = new Transicao();
+        t->destino = e;
+        t->tipo = c;
+        (*it)->transicoes.push_back(t);
+    }
+}
+void copiaVectorParaVector(vector<Estado *> &v1 , vector<Estado *> &v2){
+
+    for(vector<Estado * >::iterator it = v1.begin() ; it != v1.end() ; it ++){
+        v2.push_back((*it));
+    }
+
+}
 void Automato::criaAutomato(string exp)
 {
     vector<Automato *> heap;
@@ -29,66 +56,30 @@ void Automato::criaAutomato(string exp)
                     heap.pop_back();
                     // novo estado inicial e final
                     Estado *inicio = new Estado();
-                    inicio->inicio = true;
+                    //inicio->inicio = true;
+                    aux->EstadosIniciais.push_back(inicio);
+
                     Estado *fim = new Estado();
-                    fim->fim = true;
-// transiçoes que ligam o novo inicio ao inicio dos automatos antigos
-#define VET A1->EstadosIniciais
-                    for (vector<Estado *>::iterator it = VET.begin(); it != VET.end(); it++)
-                    {
-                        Transicao *iA1 = new Transicao();
-                        iA1->tipo = '~';
-                        iA1->destino = *it;
-                        (*it)->inicio = false;
-                        inicio->transicoes.push_back(iA1);
-                    }
-                    // limpa a lista de estados iniciais de A1
-                    VET.clear();
+                    //fim->fim = true;
+                    aux->EstadosFinais.push_back(fim);
 
-#define VET2 A2->EstadosIniciais
-                    for (vector<Estado *>::iterator it = VET2.begin(); it != VET2.end(); it++)
-                    {
-                        Transicao *iA2 = new Transicao();
-                        iA2->tipo = '~';
-                        iA2->destino = *it;
-                        (*it)->inicio = false;
-                        inicio->transicoes.push_back(iA2);
-                    }
-                    VET2.clear();
+                    // transiçoes que ligam o novo inicio ao inicio dos automatos antigos
 
-/// ligando os estados finais
-#define VETF A1->EstadosFinais
-                    for (vector<Estado *>::iterator it = VETF.begin(); it != VETF.end(); it++)
-                    {
-                        Transicao *fA1 = new Transicao();
-                        fA1->tipo = '~';
-                        fA1->destino = fim;
-                        (*it)->fim = false;
-                        (*it)->transicoes.push_back(fA1);
-                    }
-                    VETF.clear();
+                    linkEstadoParaVectorEstados(inicio, A1->EstadosIniciais, '~');
+                    A1->EstadosIniciais.clear();
+                    linkEstadoParaVectorEstados(inicio, A2->EstadosIniciais, '~');
+                    A2->EstadosIniciais.clear();
 
-#define VETF2 A2->EstadosFinais
-                    for (vector<Estado *>::iterator it = VETF2.begin(); it != VETF2.end(); it++)
-                    {
-                        Transicao *fA2 = new Transicao();
-                        fA2->tipo = '~';
-                        fA2->destino = fim;
-                        (*it)->fim = false;
-                        (*it)->transicoes.push_back(fA2);
-                    }
-                    VETF2.clear();
+                    /// ligando os estados finais
+                    linkVectorEstadosParaEstado(A1->EstadosFinais, fim, '~');
+                    A1->EstadosFinais.clear();
+                    linkVectorEstadosParaEstado(A2->EstadosFinais, fim, '~');
+                    A2->EstadosFinais.clear();
 
                     /// por fim copiando os estados dos 2 ultimos automatos para o aux
                     aux->Estados.push_back(inicio);
-                    for (vector<Estado *>::iterator it = A1->Estados.begin(); it != A1->Estados.end(); it++)
-                    {
-                        aux->Estados.push_back(*it);
-                    }
-                    for (vector<Estado *>::iterator it = A2->Estados.begin(); it != A2->Estados.end(); it++)
-                    {
-                        aux->Estados.push_back(*it);
-                    }
+                    copiaVectorParaVector(A1->Estados , aux->Estados);
+                    copiaVectorParaVector(A2->Estados , aux->Estados);
                     aux->Estados.push_back(fim);
 
                     // joga aux na heap
@@ -116,9 +107,9 @@ void Automato::criaAutomato(string exp)
                 Estado *E2 = new Estado();
 
                 // seta inicio e fim
-                E1->inicio = true;
+                //E1->inicio = true;
                 aux->EstadosIniciais.push_back(E1);
-                E2->fim = true;
+                //E2->fim = true;
                 aux->EstadosFinais.push_back(E2);
 
                 // cria a transicao e o tipo dela
@@ -138,18 +129,11 @@ void Automato::criaAutomato(string exp)
             }
         }
     }
-    for (vector<Estado *>::iterator it = heap[0]->Estados.begin(); it != heap[0]->Estados.end(); it++)
-    {
-        this->Estados.push_back(*it);
-    }
-    for (vector<Estado *>::iterator it = heap[0]->EstadosIniciais.begin(); it != heap[0]->EstadosIniciais.end(); it++)
-    {
-        this->EstadosIniciais.push_back(*it);
-    }
-    for (vector<Estado *>::iterator it = heap[0]->EstadosFinais.begin(); it != heap[0]->EstadosFinais.end(); it++)
-    {
-        this->EstadosFinais.push_back(*it);
-    }
+
+    /// copia o automato auxiliar para o automato da classe por assim dizer
+    copiaVectorParaVector(heap[0]->Estados , this->Estados);
+    copiaVectorParaVector(heap[0]->EstadosIniciais , this->EstadosIniciais);
+    copiaVectorParaVector(heap[0]->EstadosFinais , this->EstadosFinais);
 }
 void Automato::nomeiaEstados()
 {
@@ -173,8 +157,18 @@ void Automato::criaVisualizacao(ofstream &output)
 #define V (*estado)->transicoes
         for (vector<Transicao *>::iterator transicao = V.begin(); transicao != V.end(); transicao++)
         {
-            output << (*estado)->id << " -> " << (*transicao)->destino->id << "(" << (*transicao)->tipo << ")" << endl;
+            output << (*estado)->id;
+            /*
+            if((*estado)->inicio){
+                output << "(inicio) " ;
+            }
+            if((*estado)->fim){
+                output << "(fim) ";
+            }*/
+            output << " -> " << (*transicao)->destino->id << "[ label = \" " << (*transicao)->tipo << "\" ]" << endl;
         }
     }
     output << "}" << endl;
+
+    system("dot -Tpng TESTE.dot -o teste.png");
 }

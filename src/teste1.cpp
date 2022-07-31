@@ -10,11 +10,11 @@ using namespace std;
 int main(){
 
     Automato a;
-    ofstream out;
+    //ofstream out;
     //out.open("TESTE.dot");
 
-    a.criaAutomato("aa+b+c+");
-    a.criaVisualizacao(out);
+    a.criaAutomato("ab+*");
+    a.criaVisualizacao("TESTEFINAL");
 
     return 0;
 

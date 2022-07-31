@@ -32,7 +32,7 @@ public:
     ~Automato();
 
     void criaAutomato(string Expressao);
-    void criaVisualizacao(ofstream& output);
+    void criaVisualizacao( string name);
 
 private:
 

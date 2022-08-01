@@ -2,8 +2,10 @@
 #define AUTOMATO_H
 
 #include <vector>
+#include <set>
 #include <string>
 #include <fstream>
+#include <iostream>
 
 using namespace std;
 
@@ -41,6 +43,7 @@ private:
     void nomeiaEstados();
 
     vector<Estado*> Estados;
+    set<char> Alfabeto;
     vector<Estado*> EstadosIniciais;
     vector<Estado*> EstadosFinais;
 

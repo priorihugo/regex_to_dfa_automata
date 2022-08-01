@@ -6,24 +6,24 @@ Automato::Automato()
 Automato::~Automato()
 {
 }
-void linkEstadoParaVectorEstados(Estado *e, vector<Estado *> &v, char c)
+void linkEstadoParaSetEstados(Estado *e, set<Estado *> &v, char c)
 {
-    for (vector<Estado *>::iterator it = v.begin(); it != v.end(); it++)
+    for (auto it = v.begin(); it != v.end(); it++)
     {
         Transicao *t = new Transicao();
         t->destino = (*it);
         t->tipo = c;
-        e->transicoes.push_back(t);
+        e->transicoes.insert(t);
     }
 }
-void linkVectorEstadosParaEstado(vector<Estado *> &v, Estado *e, char c)
+void linkSetEstadosParaEstado(set<Estado *> &v, Estado *e, char c)
 {
-    for (vector<Estado *>::iterator it = v.begin(); it != v.end(); it++)
+    for (set<Estado *>::iterator it = v.begin(); it != v.end(); it++)
     {
         Transicao *t = new Transicao();
         t->destino = e;
         t->tipo = c;
-        (*it)->transicoes.push_back(t);
+        (*it)->transicoes.insert(t);
     }
 }
 void copiaVectorParaVector(vector<Estado *> &v1, vector<Estado *> &v2)
@@ -43,8 +43,7 @@ void copiaSetParaSet(set<T> &s1, set<T> &s2)
 }
 void fechoLambdaHelper(Estado *e, set<Estado *> &v)
 {
-
-    for (vector<Transicao *>::iterator it = e->transicoes.begin(); it != e->transicoes.end(); it++)
+    for (auto it = e->transicoes.begin(); it != e->transicoes.end(); it++)
     {
         if ((*it)->tipo == '~')
         {
@@ -55,7 +54,6 @@ void fechoLambdaHelper(Estado *e, set<Estado *> &v)
 }
 void fechoLambda(Estado *e, set<Estado *> &v)
 {
-
     v.insert(e);
     fechoLambdaHelper(e, v);
 }
@@ -83,30 +81,27 @@ void Automato::criaAutomato(string exp)
                     heap.pop_back();
                     // novo estado inicial e final
                     Estado *inicio = new Estado();
-                    // inicio->inicio = true;
-                    aux->EstadosIniciais.push_back(inicio);
-
+                    aux->EstadosIniciais.insert(inicio);
                     Estado *fim = new Estado();
-                    // fim->fim = true;
-                    aux->EstadosFinais.push_back(fim);
+                    aux->EstadosFinais.insert(fim);
 
                     // transiçoes que ligam o novo inicio ao inicio dos automatos antigos
-                    linkEstadoParaVectorEstados(inicio, A1->EstadosIniciais, '~');
+                    linkEstadoParaSetEstados(inicio, A1->EstadosIniciais, '~');
                     A1->EstadosIniciais.clear();
-                    linkEstadoParaVectorEstados(inicio, A2->EstadosIniciais, '~');
+                    linkEstadoParaSetEstados(inicio, A2->EstadosIniciais, '~');
                     A2->EstadosIniciais.clear();
 
                     /// ligando os estados finais
-                    linkVectorEstadosParaEstado(A1->EstadosFinais, fim, '~');
+                    linkSetEstadosParaEstado(A1->EstadosFinais, fim, '~');
                     A1->EstadosFinais.clear();
-                    linkVectorEstadosParaEstado(A2->EstadosFinais, fim, '~');
+                    linkSetEstadosParaEstado(A2->EstadosFinais, fim, '~');
                     A2->EstadosFinais.clear();
 
                     /// por fim copiando os estados dos 2 ultimos automatos para o aux
-                    aux->Estados.push_back(inicio);
-                    copiaVectorParaVector(A1->Estados, aux->Estados);
-                    copiaVectorParaVector(A2->Estados, aux->Estados);
-                    aux->Estados.push_back(fim);
+                    aux->Estados.insert(inicio);
+                    copiaSetParaSet(A1->Estados, aux->Estados);
+                    copiaSetParaSet(A2->Estados, aux->Estados);
+                    aux->Estados.insert(fim);
 
                     // junta os alfabetos
                     copiaSetParaSet(A1->Alfabeto, aux->Alfabeto);
@@ -130,14 +125,14 @@ void Automato::criaAutomato(string exp)
                     heap.pop_back();
 
                     // linkando todos os estados finais de a2 aos iniciais de a1
-                    for (vector<Estado *>::iterator it = A2->EstadosFinais.begin(); it < A2->EstadosFinais.end(); it++)
+                    for (auto it = A2->EstadosFinais.begin(); it != A2->EstadosFinais.end(); it++)
                     {
-                        linkEstadoParaVectorEstados((*it), A1->EstadosIniciais, '~');
+                        linkEstadoParaSetEstados((*it), A1->EstadosIniciais, '~');
                     }
-                    copiaVectorParaVector(A1->Estados, aux->Estados);
-                    copiaVectorParaVector(A2->Estados, aux->Estados);
-                    copiaVectorParaVector(A2->EstadosIniciais, aux->EstadosIniciais);
-                    copiaVectorParaVector(A1->EstadosFinais, aux->EstadosFinais);
+                    copiaSetParaSet(A1->Estados, aux->Estados);
+                    copiaSetParaSet(A2->Estados, aux->Estados);
+                    copiaSetParaSet(A2->EstadosIniciais, aux->EstadosIniciais);
+                    copiaSetParaSet(A1->EstadosFinais, aux->EstadosFinais);
 
                     copiaSetParaSet(A1->Alfabeto, aux->Alfabeto);
                     copiaSetParaSet(A2->Alfabeto, aux->Alfabeto);
@@ -155,21 +150,35 @@ void Automato::criaAutomato(string exp)
                     Automato *A1 = heap.back();
                     heap.pop_back();
 
-                    for (vector<Estado *>::iterator it = A1->EstadosFinais.begin(); it != A1->EstadosFinais.end(); it++)
+                    Estado *inicio = new Estado();
+                    Estado *fim = new Estado();
+
+                    aux->Estados.insert(inicio);
+                    aux->EstadosIniciais.insert(inicio);
+                    aux->EstadosFinais.insert(fim);
+
+                    Transicao *t = new Transicao();
+                    t->tipo = '~';
+                    t->destino = fim;
+                    inicio->transicoes.insert(t);
+
+                    for (auto it = A1->EstadosFinais.begin(); it != A1->EstadosFinais.end(); it++)
                     {
-                        linkEstadoParaVectorEstados((*it), A1->EstadosIniciais, '~');
+                        linkEstadoParaSetEstados((*it), A1->EstadosIniciais, '~');
                     }
-
-                    A1->EstadosFinais.clear();
-                    copiaVectorParaVector(A1->EstadosIniciais, A1->EstadosFinais);
-
-                    copiaVectorParaVector(A1->Estados, aux->Estados);
-                    copiaVectorParaVector(A1->EstadosIniciais, aux->EstadosIniciais);
-                    copiaVectorParaVector(A1->EstadosFinais, aux->EstadosFinais);
-
+                    linkEstadoParaSetEstados(inicio, A1->EstadosIniciais, '~');
+                    linkSetEstadosParaEstado(A1->EstadosFinais, fim, '~');
+                    copiaSetParaSet(A1->Estados, aux->Estados);
                     copiaSetParaSet(A1->Alfabeto, aux->Alfabeto);
 
+                    aux->Estados.insert(fim);
+
                     heap.push_back(aux);
+                    A1->EstadosIniciais.clear();
+                    A1->EstadosFinais.clear();
+                    A1->Estados.clear();
+                    A1->Alfabeto.clear();
+
                     delete A1;
                 }
                 break;
@@ -179,40 +188,47 @@ void Automato::criaAutomato(string exp)
                 Estado *E1 = new Estado();
                 Estado *E2 = new Estado();
                 // seta inicio e fim
-                // E1->inicio = true;
-                aux->EstadosIniciais.push_back(E1);
-                // E2->fim = true;
-                aux->EstadosFinais.push_back(E2);
+                aux->EstadosIniciais.insert(E1);
+                aux->EstadosFinais.insert(E2);
                 // cria a transicao e o tipo dela
                 Transicao *E1E2 = new Transicao();
                 E1E2->destino = E2;
                 E1E2->tipo = exp[i];
                 aux->Alfabeto.insert(exp[i]);
 
-                E1->transicoes.push_back(E1E2);
+                E1->transicoes.insert(E1E2);
                 // adiciona ao automato criado
-                aux->Estados.push_back(E1);
-                aux->Estados.push_back(E2);
+                aux->Estados.insert(E1);
+                aux->Estados.insert(E2);
                 // joga na heap
                 heap.push_back(aux);
                 break;
             }
         }
     }
+    // alterando estados finais para o fecho lambda dos estados finais
+    // ajuda daqui pra frente
+
+    for (auto it = this->EstadosFinais.begin(); it != this->EstadosFinais.end(); it++)
+    {
+        set<Estado *> fecho;
+        fechoLambda((*it), fecho);
+        copiaSetParaSet(fecho, this->EstadosFinais);
+        fecho.clear();
+    }
     /// copia o automato auxiliar para o automato da classe por assim dizer
-    copiaVectorParaVector(heap[0]->Estados, this->Estados);
-    copiaVectorParaVector(heap[0]->EstadosIniciais, this->EstadosIniciais);
-    copiaVectorParaVector(heap[0]->EstadosFinais, this->EstadosFinais);
-
+    copiaSetParaSet(heap[0]->Estados, this->Estados);
+    copiaSetParaSet(heap[0]->EstadosIniciais, this->EstadosIniciais);
+    copiaSetParaSet(heap[0]->EstadosFinais, this->EstadosFinais);
     copiaSetParaSet(heap[0]->Alfabeto, this->Alfabeto);
-
 
     this->reduzParaAFD();
 }
-void imprimeset(set<Estado *> &s){
+void imprimeset(set<Estado *> &s)
+{
 
-    cout << "{" ;
-    for (auto it = s.begin(); it != s.end() ; it++)
+    cout << "{";
+    for (auto it = s.begin(); it != s.end(); it++)
     {
         cout << " " << (*it)->id << " ";
     }
@@ -228,14 +244,14 @@ void Automato::reduzParaAFD()
 {
     this->nomeiaEstados();
 
-    //aux representa o novo automato
+    // aux representa o novo automato
     Automato *aux = new Automato();
-    //o conjunto de estados vai representar um estado equivalente no novo automato
+    // o conjunto de estados vai representar um estado equivalente no novo automato
     ConjuntoEstados *inicio = new ConjuntoEstados();
-
-    //esse set representa o conjunto dos novos estados do novo automato
-    set<ConjuntoEstados *> novosEstados;
+    // esse set representa o conjunto dos novos estados do novo automato
+    list<ConjuntoEstados *> novosEstados;
     Estado *estadoInicial = new Estado();
+    inicio->estadoCorrespondente = estadoInicial;
     // fecho lambda dos estados iniciais
     for (auto estado = this->EstadosIniciais.begin(); estado != this->EstadosIniciais.end(); estado++)
     {
@@ -247,93 +263,149 @@ void Automato::reduzParaAFD()
         cout << inicio << endl;
         imprimeset(inicio->conjunto);
     }
-    inicio->estadoCorrespondente = estadoInicial;
+    //verificando se tambem é final;
+    for (auto it = this->EstadosFinais.begin(); it != this->EstadosFinais.end(); it++)
+    {
+        for (auto it2 = inicio->conjunto.begin(); it2 != inicio->conjunto.end(); it2++)
+        {
+            cout << (*it)->id << " e estado final! " << endl;
+            if ((*it) == (*it2))
+            {
+                aux->EstadosFinais.insert(inicio->estadoCorrespondente);
+                break;
+            }
+        }
+    }
+    aux->Estados.insert(estadoInicial);
+    aux->EstadosIniciais.insert(estadoInicial);
 
-    aux->Estados.push_back(estadoInicial);
-    aux->EstadosIniciais.push_back(estadoInicial);
-
-    novosEstados.insert(inicio);
+    novosEstados.push_back(inicio);
 
     // iterator do set de novos estados
-    auto novosEstadosIt = novosEstados.begin();
-    // itera pelo conjunto de estados que vao sendo criados a medida que passamos pela tabela de transicao correspondente
-    while (novosEstadosIt != novosEstados.end())
-    {
-        // itera sobre o alfabeto do automato
 
-        cout <<"Saindo do conjunto de estados " ;
+    // itera pelo conjunto de estados que vao sendo criados a medida que passamos pela tabela de transicao correspondente
+    for (auto novosEstadosIt = novosEstados.begin(); novosEstadosIt != novosEstados.end(); novosEstadosIt++)
+    {
+        cout << "Saindo do conjunto de estados ";
         cout << (*novosEstadosIt) << endl;
         imprimeset((*novosEstadosIt)->conjunto);
-        cout << endl;
-
+        // itera sobre o alfabeto do automato
         for (auto simbolo = this->Alfabeto.begin(); simbolo != this->Alfabeto.end(); simbolo++)
         {
             // estados alcançados pelo simbolo
             char simboloAtual = (*simbolo);
             cout << "Com o simbolo " << simboloAtual << endl;
-
-            //criando um novo conjunto de estados para representar os estados alcançados por casa simbolo e um novo estado que é correspondente a estes;
+            // criando um novo conjunto de estados para representar os estados alcançados por casa simbolo e um novo estado que é correspondente a estes;
             ConjuntoEstados *estadosAlcancados = new ConjuntoEstados();
             Estado *novoEstado = new Estado();
             estadosAlcancados->estadoCorrespondente = novoEstado;
             //
-            //iterando pelos estados de um conjunto presente nos novos estados
+            // iterando pelos estados de um conjunto presente nos novos estados
             for (auto estado = (*novosEstadosIt)->conjunto.begin(); estado != (*novosEstadosIt)->conjunto.end(); estado++)
             {
                 // passa pelas transicoes de cada estado
                 for (auto transicao = (*estado)->transicoes.begin(); transicao != (*estado)->transicoes.end(); transicao++)
                 {
-                    Estado *estadoDestino = (*transicao)->destino;
-                    // se existe transicao com o simbolo atual e chega a algum estado
                     if ((*transicao)->tipo == simboloAtual)
                     {
-                        set<Estado *> fecho;
-                        // calcula o fecho lambda de todo estado atingivel
-                        fechoLambda(estadoDestino, fecho);
-                        // joga o fecho lambda do estado atingivel nos estados alcançaveis
-                        copiaSetParaSet(fecho, estadosAlcancados->conjunto);
+                        Estado *estadoDestino = (*transicao)->destino;
+                        estadosAlcancados->conjunto.insert(estadoDestino);
                     }
                 }
             }
-            cout << "Estados alcancados: " ;
-            cout << (estadosAlcancados) << endl;
-            imprimeset(estadosAlcancados->conjunto);
-            cout << endl;
+            ConjuntoEstados *estadosAlcancadosFecho = new ConjuntoEstados();
+            Estado *ec = new Estado();
+            estadosAlcancadosFecho->estadoCorrespondente = ec;
 
-            // iterando pelos novos estados e verificando se o cojunto ja existe
-            bool insert = true;
-            for (auto conjunto = novosEstados.begin(); conjunto != novosEstados.end(); conjunto++)
+            for (auto it = estadosAlcancados->conjunto.begin(); it != estadosAlcancados->conjunto.end(); it++)
             {
-                if ((*conjunto)->conjunto == estadosAlcancados->conjunto)
+                set<Estado *> fecho;
+                fechoLambda((*it), fecho);
+                copiaSetParaSet(fecho, estadosAlcancadosFecho->conjunto);
+                fecho.clear();
+            }
+            cout << "Estados alcancados: ";
+            cout << (estadosAlcancadosFecho) << endl;
+            imprimeset(estadosAlcancadosFecho->conjunto);
+
+            // verifica se existe um set na lista totalmente igual ao set encontrado
+            bool insert = true;
+            for (auto estadoC = novosEstados.begin(); estadoC != novosEstados.end(); estadoC++)
+            {
+                if ((*estadoC)->conjunto == estadosAlcancadosFecho->conjunto)
                 {
+                    cout << "Conjunto ja existe no set" << endl;
                     insert = false;
-                    //criando uma transição do estado para ele mesmo com o simbolo
-                    Transicao *nova = new Transicao();
-                    nova->tipo = simboloAtual;
-                    nova->destino = (*conjunto)->estadoCorrespondente;
-                    (*conjunto)->estadoCorrespondente->transicoes.push_back(nova);
-                    aux->Estados.push_back((*conjunto)->estadoCorrespondente);
+                    estadosAlcancadosFecho = (*estadoC);
                 }
             }
-            // caso não encontre cojunto igual
-            if (insert)
+            // iteraçãozinha pra descobrir estados finais e iniciais
+            for (auto it = this->EstadosIniciais.begin(); it != this->EstadosIniciais.end(); it++)
             {
-                novosEstados.insert(estadosAlcancados);
+                for (auto it2 = estadosAlcancadosFecho->conjunto.begin(); it2 != estadosAlcancadosFecho->conjunto.end(); it2++)
+                {
+                    if ((*it) == (*it2))
+                    {
+                        cout << (*it)->id << " e estado inicial! " << endl;
+                        aux->EstadosIniciais.insert(estadosAlcancadosFecho->estadoCorrespondente);
+                        break;
+                    }
+                }
+            }
+            for (auto it = this->EstadosFinais.begin(); it != this->EstadosFinais.end(); it++)
+            {
+                for (auto it2 = estadosAlcancadosFecho->conjunto.begin(); it2 != estadosAlcancadosFecho->conjunto.end(); it2++)
+                {
+                    cout << (*it)->id << " e estado final! " << endl;
+                    if ((*it) == (*it2))
+                    {
+                        aux->EstadosFinais.insert(estadosAlcancadosFecho->estadoCorrespondente);
+                        break;
+                    }
+                }
+            }
+
+            // se o estado n leva a algum conjunto
+            // ficaria dificil manter esse estado
+            if (!estadosAlcancadosFecho->conjunto.empty()) // caso não encontre cojunto igual
+            {
+                if (insert)
+                {
+                    cout << "Inserindo novo estado correspondente ao conjunto ";
+                    imprimeset(estadosAlcancadosFecho->conjunto);
+                    cout << endl;
+
+                    novosEstados.push_back(estadosAlcancadosFecho);
+                    aux->Estados.insert(estadosAlcancadosFecho->estadoCorrespondente);
+                }
                 Transicao *nova = new Transicao();
                 nova->tipo = simboloAtual;
-                nova->destino = estadosAlcancados->estadoCorrespondente;
-                (*novosEstadosIt)->estadoCorrespondente->transicoes.push_back(nova);
-                aux->Estados.push_back(estadosAlcancados->estadoCorrespondente);
+                nova->destino = estadosAlcancadosFecho->estadoCorrespondente;
+                (*novosEstadosIt)->estadoCorrespondente->transicoes.insert(nova);
+                cout << "criando uma nova transicao do tipo " << simboloAtual << " de ";
+                imprimeset((*novosEstadosIt)->conjunto);
+                cout << " para ";
+                imprimeset((estadosAlcancadosFecho->conjunto));
+                cout << endl;
             }
         }
-        novosEstadosIt++;
     }
+    this->Alfabeto.clear();
+    this->Estados.clear();
+    this->EstadosIniciais.clear();
+    this->EstadosFinais.clear();
+
+    copiaSetParaSet(aux->Alfabeto , this->Alfabeto);
+    copiaSetParaSet(aux->Estados , this->Estados);
+    copiaSetParaSet(aux->EstadosIniciais , this->EstadosIniciais);
+    copiaSetParaSet(aux->EstadosFinais , this->EstadosFinais);
+    
     aux->criaVisualizacao("minimizado");
 }
 void Automato::nomeiaEstados()
 {
     int n = 1;
-    for (vector<Estado *>::iterator it = this->Estados.begin(); it != this->Estados.end(); it++)
+    for (auto it = this->Estados.begin(); it != this->Estados.end(); it++)
     {
         (*it)->id = n;
         n++;
@@ -349,20 +421,20 @@ void Automato::criaVisualizacao(string name)
 
     output << "digraph " << name << " {" << endl;
 
-    for (vector<Estado *>::iterator estado = this->EstadosIniciais.begin(); estado != this->EstadosIniciais.end(); estado++)
+    for (auto estado = this->EstadosIniciais.begin(); estado != this->EstadosIniciais.end(); estado++)
     {
         output << (*estado)->id << "[ color = blue ]" << endl;
     }
 
-    for (vector<Estado *>::iterator estado = this->EstadosFinais.begin(); estado != this->EstadosFinais.end(); estado++)
+    for (auto estado = this->EstadosFinais.begin(); estado != this->EstadosFinais.end(); estado++)
     {
         output << (*estado)->id << "[ color = red ]" << endl;
     }
 
-    for (vector<Estado *>::iterator estado = this->Estados.begin(); estado != this->Estados.end(); estado++)
+    for (auto estado = this->Estados.begin(); estado != this->Estados.end(); estado++)
     {
 #define V (*estado)->transicoes
-        for (vector<Transicao *>::iterator transicao = V.begin(); transicao != V.end(); transicao++)
+        for (auto transicao = V.begin(); transicao != V.end(); transicao++)
         {
             output << (*estado)->id;
             /*

@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <set>
+#include <list>
 #include <string>
 #include <fstream>
 #include <iostream>
@@ -15,9 +16,7 @@ struct Transicao;
 typedef struct Estado
 {
     int id = -1;
-    bool inicio = false;
-    bool fim = false;
-    vector<Transicao*> transicoes;
+    set<Transicao*> transicoes;
 }Estado;
 
 typedef struct Transicao
@@ -37,16 +36,13 @@ public:
     void criaVisualizacao( string name);
 
 private:
-
-    void reduzParaAFN();
     void reduzParaAFD();
     void nomeiaEstados();
 
-    vector<Estado*> Estados;
+    set<Estado*> Estados;
     set<char> Alfabeto;
-    vector<Estado*> EstadosIniciais;
-    vector<Estado*> EstadosFinais;
-
+    set<Estado*> EstadosIniciais;
+    set<Estado*> EstadosFinais;
 };
 
 #endif

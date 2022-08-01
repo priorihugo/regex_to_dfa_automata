@@ -13,8 +13,10 @@ int main(){
     //ofstream out;
     //out.open("TESTE.dot");
 
-    a.criaAutomato("a*");
+    a.criaAutomato("aa.bc++*");
     a.criaVisualizacao("TESTEFINAL");
+
+    a.processaString("aabcaa");
 
     return 0;
 

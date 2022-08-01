@@ -402,6 +402,29 @@ void Automato::reduzParaAFD()
     
     aux->criaVisualizacao("minimizado");
 }
+void Automato::processaString(string data){
+
+    auto it = this->EstadosIniciais.begin();
+    Estado* estadoAtual = (*it);
+    int charAtual = 0;
+    bool continua = true;
+    while (charAtual < data.size() && estadoAtual != nullptr)
+    {
+        //itera pelo estado atual
+        Estado* proximoEstado = nullptr;
+        for (auto it = estadoAtual->transicoes.begin(); it != estadoAtual->transicoes.end() ; it++)
+        {
+            if((*it)->tipo == data[charAtual]){
+            cout << "Saindo do estado " << estadoAtual->id << " para " << (*it)->destino->id << " com " << data[charAtual] << endl;
+                proximoEstado = (*it)->destino;
+                charAtual++;
+                break;
+            }
+        }
+        estadoAtual = proximoEstado;
+    }
+    
+}
 void Automato::nomeiaEstados()
 {
     int n = 1;
@@ -428,7 +451,7 @@ void Automato::criaVisualizacao(string name)
 
     for (auto estado = this->EstadosFinais.begin(); estado != this->EstadosFinais.end(); estado++)
     {
-        output << (*estado)->id << "[ color = red ]" << endl;
+        output << (*estado)->id << "[ shape=doublecircle ]" << endl;
     }
 
     for (auto estado = this->Estados.begin(); estado != this->Estados.end(); estado++)

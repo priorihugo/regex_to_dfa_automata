@@ -33,7 +33,8 @@ public:
     ~Automato();
 
     void criaAutomato(string Expressao);
-    void criaVisualizacao( string name);
+    void criaVisualizacao(string name);
+    void processaString(string data);
 
 private:
     void reduzParaAFD();

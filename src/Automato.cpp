@@ -234,6 +234,15 @@ void imprimeset(set<Estado *> &s)
     }
     cout << "}" << endl;
 }
+void Automato::imprimeSetFormal(set<Estado *> s)
+{
+    cout << "{";
+    for (auto it = s.begin(); it != s.end(); it++)
+    {
+        cout << (*it)->id << " ";
+    }
+    cout << "}";
+}
 typedef struct ConjuntoEstados
 {
     set<Estado *> conjunto;

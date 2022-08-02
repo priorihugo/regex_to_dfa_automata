@@ -36,6 +36,7 @@ public:
     void criaAutomato(string Expressao, string name_tag);
     void criaVisualizacao(string name);
     bool processaString(string data, int* posicao);
+    void imprimeSetFormal(set<Estado *> s);
 
     set<Estado*> getEstados() {return this->Estados;};
     set<Estado*> getEstadosIniciais() {return this->EstadosIniciais;};

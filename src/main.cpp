@@ -460,35 +460,30 @@ void listarAutomatos(vector<Tag> tags)
         return;
     }
 
+    cout << "[INFO] Funcao transicao esta sendo representada pelo arquivo de saida, no diretorio output, da seguinte forma : \"nome da tag.png ou .dot\""
+         << endl;
+
     for (int i = 0; i < tags.size(); i++)
     {
-        cout << tags[i].nome << " = ({";
+        cout << tags[i].nome << "=(";
 
-        for (auto it = tags[i].automato.getEstados().begin(); it != tags[i].automato.getEstados().end(); it++)
-        {
-            cout << (*it)->id << " ";
-        }
-        cout << "}, {";
-
+        // Imprime estados do automato.
+        tags[i].automato.imprimeSetFormal(tags[i].automato.getEstados());
+        cout << ", ";
+        // Imprime alfabeto.
         vector<char> alfabeto = encontrarAlfabeto(tags[i].expressao);
+        cout << "{";
         for (int j = 0; j < alfabeto.size(); j++)
         {
             cout << alfabeto[j] << " ";
         }
         cout << "}, ";
-
-        for (auto it = tags[i].automato.getEstadosIniciais().begin(); it != tags[i].automato.getEstadosIniciais().end(); it++)
-        {
-            cout << (*it)->id << " ";
-        }
-        cout << ", {";
-
-        for (auto it = tags[i].automato.getEstadosFinais().begin(); it != tags[i].automato.getEstadosFinais().end(); it++)
-        {
-            cout << (*it)->id << " ";
-        }
-        cout << "})" << endl;
-
+        // Imprime estado inicial.
+        tags[i].automato.imprimeSetFormal(tags[i].automato.getEstadosIniciais());
+        cout << ", ";
+        // Imprime estados finais.
+        tags[i].automato.imprimeSetFormal(tags[i].automato.getEstadosFinais());
+        cout << ")" << endl;
     }
 }
 

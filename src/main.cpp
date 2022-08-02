@@ -29,7 +29,7 @@ vector<string> leArquivo(string arquivo)
 
     // Abre arquivo.
     ifstream input_file;
-    input_file.open("../input/" + arquivo, ios::in);
+    input_file.open("./input/" + arquivo, ios::in);
 
     // Verifica se arquivo foi aberto.
     if (!input_file.is_open())
@@ -61,7 +61,7 @@ vector<string> leArquivo(string arquivo)
 void escreveArquivoTags(string arquivo, vector<Tag> tags)
 {
     ofstream output_file;
-    output_file.open("../output/" + arquivo, ios::out);
+    output_file.open("./output/" + arquivo, ios::out);
 
     // Verifica se arquivo foi aberto.
     if (!output_file.is_open())
@@ -89,7 +89,7 @@ void escreveArquivoStrings(string arquivo, vector<Str_dividida> str)
         return;
     }
     ofstream output_file;
-    output_file.open("../output/" + arquivo, ios::out);
+    output_file.open("./output/" + arquivo, ios::out);
 
     // Verifica se arquivo foi aberto.
     if (!output_file.is_open())

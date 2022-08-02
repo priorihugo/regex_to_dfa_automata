@@ -1,2 +1,4 @@
 x=1037
 DCC146 = 1000 /* Aspectos Teoricos da Computacao eh nota 1000! */
+x=_
+.......

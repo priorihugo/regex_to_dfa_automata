@@ -57,7 +57,7 @@ void fechoLambda(Estado *e, set<Estado *> &v)
     v.insert(e);
     fechoLambdaHelper(e, v);
 }
-void Automato::criaAutomato(string exp)
+void Automato::criaAutomato(string exp, string name_tag)
 {
     vector<Automato *> heap;
 
@@ -222,7 +222,7 @@ void Automato::criaAutomato(string exp)
     copiaSetParaSet(heap[0]->EstadosFinais, this->EstadosFinais);
     copiaSetParaSet(heap[0]->Alfabeto, this->Alfabeto);
 
-    this->reduzParaAFD();
+    this->reduzParaAFD(name_tag);
 }
 void imprimeset(set<Estado *> &s)
 {
@@ -240,7 +240,7 @@ typedef struct ConjuntoEstados
     Estado *estadoCorrespondente;
 } CE;
 
-void Automato::reduzParaAFD()
+void Automato::reduzParaAFD(string name_tag)
 {
     this->nomeiaEstados();
 
@@ -255,20 +255,20 @@ void Automato::reduzParaAFD()
     // fecho lambda dos estados iniciais
     for (auto estado = this->EstadosIniciais.begin(); estado != this->EstadosIniciais.end(); estado++)
     {
-        cout << "Criando conjunto de estados iniciais" << endl;
+        // cout << "Criando conjunto de estados iniciais" << endl;
         set<Estado *> fecho;
         fechoLambda((*estado), fecho);
         copiaSetParaSet(fecho, inicio->conjunto);
-        cout << "Imprimento conjunto inicial" << endl;
-        cout << inicio << endl;
-        imprimeset(inicio->conjunto);
+        // cout << "Imprimento conjunto inicial" << endl;
+        // cout << inicio << endl;
+        // imprimeset(inicio->conjunto);
     }
     //verificando se tambem é final;
     for (auto it = this->EstadosFinais.begin(); it != this->EstadosFinais.end(); it++)
     {
         for (auto it2 = inicio->conjunto.begin(); it2 != inicio->conjunto.end(); it2++)
         {
-            cout << (*it)->id << " e estado final! " << endl;
+            // cout << (*it)->id << " e estado final! " << endl;
             if ((*it) == (*it2))
             {
                 aux->EstadosFinais.insert(inicio->estadoCorrespondente);
@@ -286,15 +286,15 @@ void Automato::reduzParaAFD()
     // itera pelo conjunto de estados que vao sendo criados a medida que passamos pela tabela de transicao correspondente
     for (auto novosEstadosIt = novosEstados.begin(); novosEstadosIt != novosEstados.end(); novosEstadosIt++)
     {
-        cout << "Saindo do conjunto de estados ";
-        cout << (*novosEstadosIt) << endl;
-        imprimeset((*novosEstadosIt)->conjunto);
+        // cout << "Saindo do conjunto de estados ";
+        // cout << (*novosEstadosIt) << endl;
+        // imprimeset((*novosEstadosIt)->conjunto);
         // itera sobre o alfabeto do automato
         for (auto simbolo = this->Alfabeto.begin(); simbolo != this->Alfabeto.end(); simbolo++)
         {
             // estados alcançados pelo simbolo
             char simboloAtual = (*simbolo);
-            cout << "Com o simbolo " << simboloAtual << endl;
+            // cout << "Com o simbolo " << simboloAtual << endl;
             // criando um novo conjunto de estados para representar os estados alcançados por casa simbolo e um novo estado que é correspondente a estes;
             ConjuntoEstados *estadosAlcancados = new ConjuntoEstados();
             Estado *novoEstado = new Estado();
@@ -324,9 +324,9 @@ void Automato::reduzParaAFD()
                 copiaSetParaSet(fecho, estadosAlcancadosFecho->conjunto);
                 fecho.clear();
             }
-            cout << "Estados alcancados: ";
-            cout << (estadosAlcancadosFecho) << endl;
-            imprimeset(estadosAlcancadosFecho->conjunto);
+            // cout << "Estados alcancados: ";
+            // cout << (estadosAlcancadosFecho) << endl;
+            // imprimeset(estadosAlcancadosFecho->conjunto);
 
             // verifica se existe um set na lista totalmente igual ao set encontrado
             bool insert = true;
@@ -334,7 +334,7 @@ void Automato::reduzParaAFD()
             {
                 if ((*estadoC)->conjunto == estadosAlcancadosFecho->conjunto)
                 {
-                    cout << "Conjunto ja existe no set" << endl;
+                    // cout << "Conjunto ja existe no set" << endl;
                     insert = false;
                     estadosAlcancadosFecho = (*estadoC);
                 }
@@ -346,7 +346,7 @@ void Automato::reduzParaAFD()
                 {
                     if ((*it) == (*it2))
                     {
-                        cout << (*it)->id << " e estado inicial! " << endl;
+                        // cout << (*it)->id << " e estado inicial! " << endl;
                         aux->EstadosIniciais.insert(estadosAlcancadosFecho->estadoCorrespondente);
                         break;
                     }
@@ -356,7 +356,7 @@ void Automato::reduzParaAFD()
             {
                 for (auto it2 = estadosAlcancadosFecho->conjunto.begin(); it2 != estadosAlcancadosFecho->conjunto.end(); it2++)
                 {
-                    cout << (*it)->id << " e estado final! " << endl;
+                    // cout << (*it)->id << " e estado final! " << endl;
                     if ((*it) == (*it2))
                     {
                         aux->EstadosFinais.insert(estadosAlcancadosFecho->estadoCorrespondente);
@@ -371,9 +371,9 @@ void Automato::reduzParaAFD()
             {
                 if (insert)
                 {
-                    cout << "Inserindo novo estado correspondente ao conjunto ";
-                    imprimeset(estadosAlcancadosFecho->conjunto);
-                    cout << endl;
+                    // cout << "Inserindo novo estado correspondente ao conjunto ";
+                    // imprimeset(estadosAlcancadosFecho->conjunto);
+                    // cout << endl;
 
                     novosEstados.push_back(estadosAlcancadosFecho);
                     aux->Estados.insert(estadosAlcancadosFecho->estadoCorrespondente);
@@ -382,11 +382,11 @@ void Automato::reduzParaAFD()
                 nova->tipo = simboloAtual;
                 nova->destino = estadosAlcancadosFecho->estadoCorrespondente;
                 (*novosEstadosIt)->estadoCorrespondente->transicoes.insert(nova);
-                cout << "criando uma nova transicao do tipo " << simboloAtual << " de ";
-                imprimeset((*novosEstadosIt)->conjunto);
-                cout << " para ";
-                imprimeset((estadosAlcancadosFecho->conjunto));
-                cout << endl;
+                // cout << "criando uma nova transicao do tipo " << simboloAtual << " de ";
+                // imprimeset((*novosEstadosIt)->conjunto);
+                // cout << " para ";
+                // imprimeset((estadosAlcancadosFecho->conjunto));
+                // cout << endl;
             }
         }
     }
@@ -400,14 +400,15 @@ void Automato::reduzParaAFD()
     copiaSetParaSet(aux->EstadosIniciais , this->EstadosIniciais);
     copiaSetParaSet(aux->EstadosFinais , this->EstadosFinais);
     
-    aux->criaVisualizacao("minimizado");
+    aux->criaVisualizacao(name_tag);
 }
-void Automato::processaString(string data){
-
+bool Automato::processaString(string data, int* posicao){
+    //passar a string para todos os automatos em menoria. (1 exp => 1 automato)
     auto it = this->EstadosIniciais.begin();
     Estado* estadoAtual = (*it);
     int charAtual = 0;
     bool continua = true;
+    bool aux = false;
     while (charAtual < data.size() && estadoAtual != nullptr)
     {
         //itera pelo estado atual
@@ -415,15 +416,26 @@ void Automato::processaString(string data){
         for (auto it = estadoAtual->transicoes.begin(); it != estadoAtual->transicoes.end() ; it++)
         {
             if((*it)->tipo == data[charAtual]){
-            cout << "Saindo do estado " << estadoAtual->id << " para " << (*it)->destino->id << " com " << data[charAtual] << endl;
+            //cout << "Saindo do estado " << estadoAtual->id << " para " << (*it)->destino->id << " com " << data[charAtual] << endl;
                 proximoEstado = (*it)->destino;
                 charAtual++;
+                aux = true;
+                //marca em que posicao da string o automato validou
+                *posicao += 1;
+                if(find(this->EstadosFinais.begin(), this->EstadosFinais.end(), estadoAtual) != this->EstadosFinais.end()){
+                    return true;
+                }
                 break;
             }
         }
         estadoAtual = proximoEstado;
+        if(!aux)
+        {
+            //cout << "Automato nao aceita a string." << endl;
+            return false;
+        }
     }
-    
+    return true;    
 }
 void Automato::nomeiaEstados()
 {
@@ -440,7 +452,7 @@ void Automato::criaVisualizacao(string name)
 
     ofstream output;
 
-    output.open(name + ".dot");
+    output.open("../output/" + name + ".dot");
 
     output << "digraph " << name << " {" << endl;
 
@@ -472,7 +484,7 @@ void Automato::criaVisualizacao(string name)
     }
     output << "}" << endl;
 
-    string command = ("dot -Tpng " + name + ".dot -o " + name + ".png");
+    string command = ("dot -Tpng ../output/" + name + ".dot -o " + "../output/" + name + ".png");
     const char *c = command.c_str();
     system(c);
 }

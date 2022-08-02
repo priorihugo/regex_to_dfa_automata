@@ -5,13 +5,23 @@
 #include <stack>
 #include <algorithm>
 
+#include "Automato.h"
+
 using namespace std;
 
 struct Tag
 {
     string nome;
     string expressao;
+    Automato automato;
 };
+
+struct Str_dividida
+{
+    vector<string> tags;
+    string str;
+};
+
 // Ler arquivo.
 vector<string> leArquivo(string arquivo)
 {
@@ -71,9 +81,47 @@ void escreveArquivoTags(string arquivo, vector<Tag> tags)
     output_file.close();
 }
 
+void escreveArquivoStrings(string arquivo, vector<Str_dividida> str)
+{
+    if (str.empty())
+    {
+        cout << "[INFO] Nenhuma string foi processada." << endl;
+        return;
+    }
+    ofstream output_file;
+    output_file.open("../output/" + arquivo, ios::out);
+
+    // Verifica se arquivo foi aberto.
+    if (!output_file.is_open())
+    {
+        cout << "[ERROR] Nao foi possivel abrir arquivo." << endl;
+        exit(2);
+    }
+
+    vector<string>::iterator it1;
+    vector<Str_dividida>::iterator it2;
+
+    for (it2 = str.begin(); it2 != str.end(); it2++)
+    {
+        output_file << it2->str << endl;
+
+        for (it1 = it2->tags.begin(); it1 != it2->tags.end(); it1++)
+        {
+            output_file << "[" << *it1 << "] ";
+        }
+        output_file << endl;
+        output_file << endl;
+    }
+
+    cout << "[INFO] Strings salvas no arquivo " << arquivo << endl;
+
+    // Fecha arquivo.
+    output_file.close();
+}
+
 vector<Tag> concatenaVetores(vector<Tag> tags, vector<Tag> tagsValidas)
 {
-    for(int i = 0; i < tags.size(); i++)
+    for (int i = 0; i < tags.size(); i++)
     {
         tagsValidas.push_back(tags[i]);
     }
@@ -147,7 +195,7 @@ bool validaExpressao(string exp)
                 }
                 break;
             case '/':
-            if (heap.size() >= 2)
+                if (heap.size() >= 2)
                 {
                     op1 = heap.back();
                     heap.pop_back();
@@ -191,7 +239,7 @@ bool validaExpressao(string exp)
         else
         {
             resultado = "";
-            cout << "[INFO] Caractere " << exp[i] << " invalido." << endl;
+            cout << "[WARNING] Caractere " << exp[i] << " invalido." << endl;
             return false;
         }
     }
@@ -201,7 +249,6 @@ bool validaExpressao(string exp)
     }
     else
     {
-        cout << "[INFO] Expressao " << exp <<  " invalida." << endl;
         return false;
     }
 }
@@ -213,12 +260,12 @@ bool validaNomeTag(string nomeTag, vector<Tag> tagsValidas)
     string str_name = nomeTag;
     // Transforma temporariamente o nome da tag em letras minusculas.
     transform(str_name.begin(), str_name.end(), str_name.begin(), ::tolower);
-    for(int i = 0; i < tagsValidas.size(); i++)
+    for (int i = 0; i < tagsValidas.size(); i++)
     {
         str_temp = tagsValidas[i].nome;
         transform(str_temp.begin(), str_temp.end(), str_temp.begin(), ::tolower);
-        
-        if(str_name == str_temp)
+
+        if (str_name == str_temp)
         {
             cout << "[WARNING] Tag \"" << nomeTag << "\" nao sera salva pois ja existe outra com mesmo nome." << endl;
             return true;
@@ -242,9 +289,9 @@ vector<Tag> divideTag(vector<string> input_tags, vector<Tag> tagsValidas)
             input_tags[i].erase(0, pos + delimiter.length());
 
             // Verifica se nome da tag é valido. (true = o nome ja existe)
-            if(!validaNomeTag(str_auxNome, tagsValidas))
+            if (!validaNomeTag(str_auxNome, tagsValidas))
             {
-                // Valida expressao da tag que ficou na string.
+                // Valida expressao da tag.
                 bool aux = validaExpressao(input_tags[i]);
 
                 // Se expressao for valida inserimos ela no vetor tagsValidas.
@@ -255,7 +302,15 @@ vector<Tag> divideTag(vector<string> input_tags, vector<Tag> tagsValidas)
                     transform(str_auxNome.begin(), str_auxNome.end(), str_auxNome.begin(), ::toupper);
                     tag.nome = str_auxNome;
                     tag.expressao = input_tags[i];
+                    // Cria automato para expressao.
+                    tag.automato.criaAutomato(tag.expressao, tag.nome);
+                    // Parametro e nome do arquivo .dot de saida.
+                    tag.automato.criaVisualizacao(tag.nome);
                     tagsValidas.push_back(tag);
+                }
+                else
+                {
+                    cout << "[WARNING] Expressao \'" << input_tags[i] << "\' da tag " << str_auxNome << " invalida." << endl;
                 }
             }
         }
@@ -288,20 +343,153 @@ vector<Tag> lerTagsTerminal(vector<Tag> tagsValidas)
     cout << "Quantas tags serao listadas?" << endl;
     cin >> quantTags;
 
-    if(quantTags < 0) 
+    if (quantTags < 0)
         cout << "[WARNING] Valor invalido." << endl;
 
-    cout << endl << "[INFO] Digite as definicoes de Tag abaixo." << endl;
+    cout << endl
+         << "[INFO] Digite as definicoes de Tag abaixo." << endl;
 
-    for(int i = 0; i <= quantTags; i++)
+    for (int i = 0; i <= quantTags; i++)
     {
         getline(cin, temp);
         tags.push_back(temp);
     }
-    
+
     tagsValidas = divideTag(tags, tagsValidas);
     cout << "[INFO] Tags carregadas." << endl;
     return tagsValidas;
+}
+
+void imprimeExpAceitas(vector<string> exp_aceitas)
+{
+    vector<string>::iterator it;
+    for (it = exp_aceitas.begin(); it != exp_aceitas.end(); it++)
+    {
+        cout << "[" << *it << "] ";
+    }
+    cout << endl;
+}
+
+vector<Str_dividida> processaString(vector<Tag> tagsValidas, vector<string> input_string)
+{
+    vector<Str_dividida> strs_div;
+    if (tagsValidas.empty())
+    {
+        cout << "[INFO] Nenhuma definicao de tag foi carregada. Execute o comando :c ou :e para carrega-las. " << endl;
+        return strs_div;
+    }
+    if (input_string.empty())
+    {
+        cout << "[INFO] Nunhuma string foi carrega do arquivo." << endl;
+        return strs_div;
+    }
+
+    bool is_processed = false;
+    // Garante que para aquele inicio de string nao existe nenhum automato equivalente.
+    int cont = 0;
+    // Retorna ultima posicao da string validada pelo automato.
+    int posicao_str = 0;
+    // Vetor armazena todos os automatos que validou pelo menos uma parte da string.
+    vector<string> exp_aceitas;
+
+    for (int i = 0; i < input_string.size(); i++)
+    {
+        cout << "String: " << input_string[i] << endl;
+        Str_dividida str;
+        str.str = input_string[i];
+
+        while (input_string[i].size() > 0)
+        {
+            cont = 0;
+            for (int j = 0; j < tagsValidas.size(); j++)
+            {
+                // cout << "TAG: " << tagsValidas[j].nome << endl;
+                is_processed = tagsValidas[j].automato.processaString(input_string[i], &posicao_str);
+                if (is_processed)
+                {
+                    cont++;
+                    auto it = find(exp_aceitas.begin(), exp_aceitas.end(), tagsValidas[j].nome);
+                    if (it == exp_aceitas.end())
+                        exp_aceitas.push_back(tagsValidas[j].nome);
+                    // cout << tagsValidas[j].nome << " " << endl;
+                    break;
+                }
+            }
+            // Nenhuma expressao validou aquele inicio da string.
+            if (cont == 0)
+                posicao_str++;
+            // cout << input_string[i] << endl;
+            // cout << posicao_str << endl;
+            input_string[i].erase(0, posicao_str);
+            posicao_str = 0;
+            // cout << input_string[i] << endl;
+            // cout << "Tamanho " << input_string[i].size() << endl;
+        }
+        if (exp_aceitas.empty())
+        {
+            cout << "[INFO] Nenhum automato em memoria processa a string " << input_string[i] << endl;
+            break;
+        }
+
+        str.tags = exp_aceitas;
+        strs_div.push_back(str);
+
+        imprimeExpAceitas(exp_aceitas);
+        exp_aceitas.clear();
+    }
+    return strs_div;
+}
+
+vector<char> encontrarAlfabeto(string exp)
+{
+    vector<char> alfabeto;
+
+    for (int i = 0; i < exp.size(); i++)
+    {
+        if (exp[i] != '+' && exp[i] != '.' && exp[i] != '*')
+            alfabeto.push_back(exp[i]);
+    }
+    return alfabeto;
+}
+
+void listarAutomatos(vector<Tag> tags)
+{
+    if (tags.empty())
+    {
+        cout << "[INFO] Nenhum automato em memoria." << endl;
+        return;
+    }
+
+    for (int i = 0; i < tags.size(); i++)
+    {
+        cout << tags[i].nome << " = ({";
+
+        for (auto it = tags[i].automato.getEstados().begin(); it != tags[i].automato.getEstados().end(); it++)
+        {
+            cout << (*it)->id << " ";
+        }
+        cout << "}, {";
+
+        vector<char> alfabeto = encontrarAlfabeto(tags[i].expressao);
+        for (int j = 0; j < alfabeto.size(); j++)
+        {
+            cout << alfabeto[j] << " ";
+        }
+        cout << "}, ";
+
+        for (auto it = tags[i].automato.getEstadosIniciais().begin(); it != tags[i].automato.getEstadosIniciais().end(); it++)
+        {
+            cout << (*it)->id << " ";
+        }
+        cout << ", {";
+
+        for (auto it = tags[i].automato.getEstadosFinais().begin(); it != tags[i].automato.getEstadosFinais().end(); it++)
+        {
+            cout << (*it)->id << " ";
+        }
+        cout << "})" << endl;
+
+    }
 }
 
 void menu()
@@ -333,7 +521,10 @@ int main()
     vector<string> input_string;
     vector<string> input_tags;
 
-    // Vetor temporario para receber retorno de funcao 
+    // Vetor armazena todas as string divididas.
+    vector<Str_dividida> strs_dividida;
+
+    // Vetor temporario para receber retorno de funcao
     // quando tag é lida via terminal.
     vector<Tag> temp;
 
@@ -378,8 +569,8 @@ int main()
         {
         case 'd':
             input_string = leArquivo(aux[1]);
-            cout << "[WARNING] Funcionalidade de dividir string nao implementada." << endl;
-            // FAZER ----> Dividir a string em tags.
+            strs_dividida = processaString(tagsValidas, input_string);
+            input_string.clear();
             break;
         case 'c':
             input_tags = leArquivo(aux[1]);
@@ -394,13 +585,15 @@ int main()
             tagsValidas = concatenaVetores(temp, tagsValidas);
             break;
         case 'o':
-            cout << "[WARNING] Funcionalidade nao implementada." << endl;
+            escreveArquivoStrings(aux[1], strs_dividida);
             break;
         case 'p':
-            cout << "[WARNING] Funcionalidade nao implementada." << endl;
+            input_string.push_back(aux[1]);
+            strs_dividida = processaString(tagsValidas, input_string);
+            input_string.clear();
             break;
         case 'a':
-            cout << "[WARNING] Funcionalidade nao implementada." << endl;
+            listarAutomatos(tagsValidas);
             break;
         case 'l':
             // Lista todas as definicoes das tags validas.

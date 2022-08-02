@@ -7,6 +7,7 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <algorithm>
 
 using namespace std;
 
@@ -32,12 +33,16 @@ public:
     Automato();
     ~Automato();
 
-    void criaAutomato(string Expressao);
+    void criaAutomato(string Expressao, string name_tag);
     void criaVisualizacao(string name);
-    void processaString(string data);
+    bool processaString(string data, int* posicao);
+
+    set<Estado*> getEstados() {return this->Estados;};
+    set<Estado*> getEstadosIniciais() {return this->EstadosIniciais;};
+    set<Estado*> getEstadosFinais() {return this->EstadosFinais;};
 
 private:
-    void reduzParaAFD();
+    void reduzParaAFD(string name_tag);
     void nomeiaEstados();
 
     set<Estado*> Estados;

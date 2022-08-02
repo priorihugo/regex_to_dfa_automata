@@ -45,7 +45,7 @@ void fechoLambdaHelper(Estado *e, set<Estado *> &v)
 {
     for (auto it = e->transicoes.begin(); it != e->transicoes.end(); it++)
     {
-        if ((*it)->tipo == '~')
+        if ((*it)->tipo == '\l')
         {
             v.insert((*it)->destino);
             fechoLambdaHelper((*it)->destino, v);
@@ -86,15 +86,15 @@ void Automato::criaAutomato(string exp, string name_tag)
                     aux->EstadosFinais.insert(fim);
 
                     // transiçoes que ligam o novo inicio ao inicio dos automatos antigos
-                    linkEstadoParaSetEstados(inicio, A1->EstadosIniciais, '~');
+                    linkEstadoParaSetEstados(inicio, A1->EstadosIniciais, '\l');
                     A1->EstadosIniciais.clear();
-                    linkEstadoParaSetEstados(inicio, A2->EstadosIniciais, '~');
+                    linkEstadoParaSetEstados(inicio, A2->EstadosIniciais, '\l');
                     A2->EstadosIniciais.clear();
 
                     /// ligando os estados finais
-                    linkSetEstadosParaEstado(A1->EstadosFinais, fim, '~');
+                    linkSetEstadosParaEstado(A1->EstadosFinais, fim, '\l');
                     A1->EstadosFinais.clear();
-                    linkSetEstadosParaEstado(A2->EstadosFinais, fim, '~');
+                    linkSetEstadosParaEstado(A2->EstadosFinais, fim, '\l');
                     A2->EstadosFinais.clear();
 
                     /// por fim copiando os estados dos 2 ultimos automatos para o aux
@@ -127,7 +127,7 @@ void Automato::criaAutomato(string exp, string name_tag)
                     // linkando todos os estados finais de a2 aos iniciais de a1
                     for (auto it = A2->EstadosFinais.begin(); it != A2->EstadosFinais.end(); it++)
                     {
-                        linkEstadoParaSetEstados((*it), A1->EstadosIniciais, '~');
+                        linkEstadoParaSetEstados((*it), A1->EstadosIniciais, '\l');
                     }
                     copiaSetParaSet(A1->Estados, aux->Estados);
                     copiaSetParaSet(A2->Estados, aux->Estados);
@@ -158,16 +158,16 @@ void Automato::criaAutomato(string exp, string name_tag)
                     aux->EstadosFinais.insert(fim);
 
                     Transicao *t = new Transicao();
-                    t->tipo = '~';
+                    t->tipo = '\l';
                     t->destino = fim;
                     inicio->transicoes.insert(t);
 
                     for (auto it = A1->EstadosFinais.begin(); it != A1->EstadosFinais.end(); it++)
                     {
-                        linkEstadoParaSetEstados((*it), A1->EstadosIniciais, '~');
+                        linkEstadoParaSetEstados((*it), A1->EstadosIniciais, '\l');
                     }
-                    linkEstadoParaSetEstados(inicio, A1->EstadosIniciais, '~');
-                    linkSetEstadosParaEstado(A1->EstadosFinais, fim, '~');
+                    linkEstadoParaSetEstados(inicio, A1->EstadosIniciais, '\l');
+                    linkSetEstadosParaEstado(A1->EstadosFinais, fim, '\l');
                     copiaSetParaSet(A1->Estados, aux->Estados);
                     copiaSetParaSet(A1->Alfabeto, aux->Alfabeto);
 
@@ -180,6 +180,57 @@ void Automato::criaAutomato(string exp, string name_tag)
                     A1->Alfabeto.clear();
 
                     delete A1;
+                }
+                break;
+            case '\\':
+                if (i < exp.length() - 1)
+                {
+                    // avança na sequencia de char
+                    i++;
+                    char c;
+                    switch (exp[i])
+                    {
+                    case 'n':
+                        c = '\n';
+                        break;
+                    case '\\':
+                        c = '\\';
+                        break;
+                        ;
+                    case '*':
+                        c = '\*';
+                        break;
+                    case '.':
+                        c = '\.';
+                        break;
+                    case '+':
+                        c = '\+';
+                        break;
+                    case 'l':
+                        c = '\l';
+                        break;
+                    default:
+                        cout << "[ERROR] Sequencia de caracteres invalida" << endl; 
+                    }
+                    Automato *aux = new Automato();
+                    Estado *E1 = new Estado();
+                    Estado *E2 = new Estado();
+                    // seta inicio e fim
+                    aux->EstadosIniciais.insert(E1);
+                    aux->EstadosFinais.insert(E2);
+                    // cria a transicao e o tipo dela
+                    Transicao *E1E2 = new Transicao();
+                    E1E2->destino = E2;
+                    E1E2->tipo = c;
+                    aux->Alfabeto.insert(c);
+
+                    E1->transicoes.insert(E1E2);
+                    // adiciona ao automato criado
+                    aux->Estados.insert(E1);
+                    aux->Estados.insert(E2);
+                    // joga na heap
+                    heap.push_back(aux);
+                    break;
                 }
                 break;
             default:
@@ -216,12 +267,14 @@ void Automato::criaAutomato(string exp, string name_tag)
         copiaSetParaSet(fecho, this->EstadosFinais);
         fecho.clear();
     }
+
     /// copia o automato auxiliar para o automato da classe por assim dizer
     copiaSetParaSet(heap[0]->Estados, this->Estados);
     copiaSetParaSet(heap[0]->EstadosIniciais, this->EstadosIniciais);
     copiaSetParaSet(heap[0]->EstadosFinais, this->EstadosFinais);
     copiaSetParaSet(heap[0]->Alfabeto, this->Alfabeto);
 
+    this->criaVisualizacao(name_tag + "max");
     this->reduzParaAFD(name_tag);
 }
 void imprimeset(set<Estado *> &s)
@@ -272,7 +325,7 @@ void Automato::reduzParaAFD(string name_tag)
         // cout << inicio << endl;
         // imprimeset(inicio->conjunto);
     }
-    //verificando se tambem é final;
+    // verificando se tambem é final;
     for (auto it = this->EstadosFinais.begin(); it != this->EstadosFinais.end(); it++)
     {
         for (auto it2 = inicio->conjunto.begin(); it2 != inicio->conjunto.end(); it2++)
@@ -404,47 +457,50 @@ void Automato::reduzParaAFD(string name_tag)
     this->EstadosIniciais.clear();
     this->EstadosFinais.clear();
 
-    copiaSetParaSet(aux->Alfabeto , this->Alfabeto);
-    copiaSetParaSet(aux->Estados , this->Estados);
-    copiaSetParaSet(aux->EstadosIniciais , this->EstadosIniciais);
-    copiaSetParaSet(aux->EstadosFinais , this->EstadosFinais);
-    
+    copiaSetParaSet(aux->Alfabeto, this->Alfabeto);
+    copiaSetParaSet(aux->Estados, this->Estados);
+    copiaSetParaSet(aux->EstadosIniciais, this->EstadosIniciais);
+    copiaSetParaSet(aux->EstadosFinais, this->EstadosFinais);
+
     aux->criaVisualizacao(name_tag);
 }
-bool Automato::processaString(string data, int* posicao){
-    //passar a string para todos os automatos em menoria. (1 exp => 1 automato)
+bool Automato::processaString(string data, int *posicao)
+{
+    // passar a string para todos os automatos em menoria. (1 exp => 1 automato)
     auto it = this->EstadosIniciais.begin();
-    Estado* estadoAtual = (*it);
+    Estado *estadoAtual = (*it);
     int charAtual = 0;
     bool continua = true;
     bool aux = false;
     while (charAtual < data.size() && estadoAtual != nullptr)
     {
-        //itera pelo estado atual
-        Estado* proximoEstado = nullptr;
-        for (auto it = estadoAtual->transicoes.begin(); it != estadoAtual->transicoes.end() ; it++)
+        // itera pelo estado atual
+        Estado *proximoEstado = nullptr;
+        for (auto it = estadoAtual->transicoes.begin(); it != estadoAtual->transicoes.end(); it++)
         {
-            if((*it)->tipo == data[charAtual]){
-            //cout << "Saindo do estado " << estadoAtual->id << " para " << (*it)->destino->id << " com " << data[charAtual] << endl;
+            if ((*it)->tipo == data[charAtual])
+            {
+                // cout << "Saindo do estado " << estadoAtual->id << " para " << (*it)->destino->id << " com " << data[charAtual] << endl;
                 proximoEstado = (*it)->destino;
                 charAtual++;
                 aux = true;
-                //marca em que posicao da string o automato validou
+                // marca em que posicao da string o automato validou
                 *posicao += 1;
-                if(find(this->EstadosFinais.begin(), this->EstadosFinais.end(), estadoAtual) != this->EstadosFinais.end()){
+                if (find(this->EstadosFinais.begin(), this->EstadosFinais.end(), estadoAtual) != this->EstadosFinais.end())
+                {
                     return true;
                 }
                 break;
             }
         }
         estadoAtual = proximoEstado;
-        if(!aux)
+        if (!aux)
         {
-            //cout << "Automato nao aceita a string." << endl;
+            // cout << "Automato nao aceita a string." << endl;
             return false;
         }
     }
-    return true;    
+    return true;
 }
 void Automato::nomeiaEstados()
 {
@@ -461,7 +517,7 @@ void Automato::criaVisualizacao(string name)
 
     ofstream output;
 
-    output.open("../output/" + name + ".dot");
+    output.open("./output/" + name + ".dot");
 
     output << "digraph " << name << " {" << endl;
 
@@ -481,19 +537,40 @@ void Automato::criaVisualizacao(string name)
         for (auto transicao = V.begin(); transicao != V.end(); transicao++)
         {
             output << (*estado)->id;
-            /*
-            if((*estado)->inicio){
-                output << "(inicio) " ;
-            }
-            if((*estado)->fim){
-                output << "(fim) ";
-            }*/
-            output << " -> " << (*transicao)->destino->id << "[ label = \" " << (*transicao)->tipo << "\" ]" << endl;
+            //
+                    string s;
+                    s.clear();
+                    switch ((*transicao)->tipo)
+                    {
+                    case '\n':
+                        s = "\\\\n";
+                        break;
+                    case '\\':
+                        s = "\\\\";
+                        break;
+                        ;
+                    case '\*':
+                        s = "\\\\*";
+                        break;
+                    case '\.':
+                        s = "\\\\.";
+                        break;
+                    case '\+':
+                        s = "\\\\+";
+                        break;
+                    case '\l':
+                        s = "\\\\l";
+                        break;
+                    default:
+                        s = (*transicao)->tipo;
+                    }
+            //
+            output << " -> " << (*transicao)->destino->id << "[ label = \" " << s << "\" ]" << endl;
         }
     }
     output << "}" << endl;
 
-    string command = ("dot -Tpng ../output/" + name + ".dot -o " + "../output/" + name + ".png");
+    string command = ("dot -Tpng ./output/" + name + ".dot -o " + "./output/" + name + ".png");
     const char *c = command.c_str();
     system(c);
 }

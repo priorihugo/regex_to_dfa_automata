@@ -139,7 +139,6 @@ void salvarTags(vector<Tag> tags, string output_file)
         cout << "[INFO] Nenhuma definicao de tag foi carregada. Execute o comando :c ou :e para carrega-las. " << endl;
     }
 }
-
 bool validaExpressao(string exp)
 {
     vector<string> heap;
@@ -194,23 +193,45 @@ bool validaExpressao(string exp)
                     return false;
                 }
                 break;
-            case '/':
-                if (heap.size() >= 2)
+            case '\\':
+                if (i < exp.length() - 1)
                 {
-                    op1 = heap.back();
-                    heap.pop_back();
-                    op2 = heap.back();
-                    heap.pop_back();
-
-                    resultado.push_back('(');
-                    resultado.append(op2);
-                    resultado.push_back('/');
-                    resultado.append(op1);
-                    resultado.push_back(')');
+                    //avança na sequencia de char
+                    i++;
+                    char c;
+                    resultado = "";
+                    switch (exp[i])
+                    {
+                    case 'n':
+                        c = '\n';
+                        resultado.push_back(c);
+                        break;
+                    case '\\':
+                        c = '\\';
+                        resultado.push_back(c);
+                        break;;
+                    case '*':
+                        c = '\*';
+                        resultado.push_back(c);
+                        break;
+                    case '.':
+                        c = '\.';
+                        resultado.push_back(c);
+                        break;
+                    case '+':
+                        c = '\+';
+                        resultado.push_back(c);
+                        break;
+                    case 'l':
+                        c = '\l';
+                        resultado.push_back(c);
+                        break;
+                    default:
+                        return false;
+                    }
                     heap.push_back(resultado);
                 }
-                else
-                {
+                else{
                     return false;
                 }
                 break;
@@ -575,9 +596,13 @@ int main()
             tagsValidas = concatenaVetores(temp, tagsValidas);
             break;
         case 'e':
+            //TODO:: Lembrar e retirar os testes
             temp.clear();
+            cout << "A" << endl;
             temp = lerTagsTerminal(tagsValidas);
+            cout << "B" << endl;
             tagsValidas = concatenaVetores(temp, tagsValidas);
+            cout << "C" << endl;
             break;
         case 'o':
             escreveArquivoStrings(aux[1], strs_dividida);

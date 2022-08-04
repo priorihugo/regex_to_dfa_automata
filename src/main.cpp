@@ -21,7 +21,6 @@ struct Str_dividida
     vector<string> tags;
     string str;
 };
-
 // Ler arquivo.
 vector<string> leArquivo(string arquivo)
 {
@@ -104,12 +103,16 @@ void escreveArquivoStrings(string arquivo, vector<Str_dividida> str)
     for (it2 = str.begin(); it2 != str.end(); it2++)
     {
         output_file << it2->str << endl;
-
-        for (it1 = it2->tags.begin(); it1 != it2->tags.end(); it1++)
+        if (!it2->tags.empty())
         {
-            output_file << "[" << *it1 << "] ";
+            for (it1 = it2->tags.begin(); it1 != it2->tags.end(); it1++)
+            {
+                output_file << *it1 << " ";
+            }
+            output_file << endl;
         }
-        output_file << endl;
+        else
+            output_file << "Nenhum automato em memoria processa a string " << endl;
         output_file << endl;
     }
 
@@ -121,24 +124,23 @@ void escreveArquivoStrings(string arquivo, vector<Str_dividida> str)
 
 vector<Tag> concatenaVetores(vector<Tag> tags, vector<Tag> tagsValidas)
 {
+    bool aux = false;
     for (int i = 0; i < tags.size(); i++)
     {
+        // for (int j = 0; j < tagsValidas.size(); j++)
+        // {
+        //     if (tags[i].nome == tagsValidas[j].nome)
+        //     {
+        //         aux = true;
+        //         break;
+        //     }
+        // }
+        // if (!aux)
         tagsValidas.push_back(tags[i]);
     }
     return tagsValidas;
 }
-// Salva tags validas em arquivo.
-void salvarTags(vector<Tag> tags, string output_file)
-{
-    if (!tags.empty())
-    {
-        escreveArquivoTags(output_file, tags);
-    }
-    else
-    {
-        cout << "[INFO] Nenhuma definicao de tag foi carregada. Execute o comando :c ou :e para carrega-las. " << endl;
-    }
-}
+
 bool validaExpressao(string exp)
 {
     vector<string> heap;
@@ -196,7 +198,7 @@ bool validaExpressao(string exp)
             case '\\':
                 if (i < exp.length() - 1)
                 {
-                    //avança na sequencia de char
+                    // avança na sequencia de char
                     i++;
                     char c;
                     resultado = "";
@@ -209,7 +211,8 @@ bool validaExpressao(string exp)
                     case '\\':
                         c = '\\';
                         resultado.push_back(c);
-                        break;;
+                        break;
+                        ;
                     case '*':
                         c = '\*';
                         resultado.push_back(c);
@@ -231,7 +234,8 @@ bool validaExpressao(string exp)
                     }
                     heap.push_back(resultado);
                 }
-                else{
+                else
+                {
                     return false;
                 }
                 break;
@@ -338,55 +342,13 @@ vector<Tag> divideTag(vector<string> input_tags, vector<Tag> tagsValidas)
     }
     return tagsValidas;
 }
-//
-void listaTags(vector<Tag> tags)
-{
-    if (!tags.empty())
-    {
-        cout << endl;
-        for (vector<Tag>::iterator it = tags.begin(); it != tags.end(); it++)
-        {
-            cout << it->nome << ": " << it->expressao << endl;
-        }
-    }
-    else
-    {
-        cout << "[INFO] Nenhuma definicao de tag foi carregada. Execute o comando :c ou :e para carrega-las. " << endl;
-    }
-}
-// Ler tags via terminal.
-vector<Tag> lerTagsTerminal(vector<Tag> tagsValidas)
-{
-    vector<string> tags;
-    string temp;
-    int quantTags = 0;
-
-    cout << "Quantas tags serao listadas?" << endl;
-    cin >> quantTags;
-
-    if (quantTags < 0)
-        cout << "[WARNING] Valor invalido." << endl;
-
-    cout << endl
-         << "[INFO] Digite as definicoes de Tag abaixo." << endl;
-
-    for (int i = 0; i <= quantTags; i++)
-    {
-        getline(cin, temp);
-        tags.push_back(temp);
-    }
-
-    tagsValidas = divideTag(tags, tagsValidas);
-    cout << "[INFO] Tags carregadas." << endl;
-    return tagsValidas;
-}
 
 void imprimeExpAceitas(vector<string> exp_aceitas)
 {
     vector<string>::iterator it;
     for (it = exp_aceitas.begin(); it != exp_aceitas.end(); it++)
     {
-        cout << "[" << *it << "] ";
+        cout << *it << " ";
     }
     cout << endl;
 }
@@ -405,58 +367,78 @@ vector<Str_dividida> processaString(vector<Tag> tagsValidas, vector<string> inpu
         return strs_div;
     }
 
-    bool is_processed = false;
-    // Garante que para aquele inicio de string nao existe nenhum automato equivalente.
-    int cont = 0;
     // Retorna ultima posicao da string validada pelo automato.
     int posicao_str = 0;
-    // Vetor armazena todos os automatos que validou pelo menos uma parte da string.
-    vector<string> exp_aceitas;
+    bool str_isValida;
+    // Vetor armazena todos os automatos que validou a string.
+    vector<string> tags_aceitas;
+    // Armazena tamanho da substring processada por um automato em cada posicao.
+    vector<int> tamSubstring;
 
+    // Percorre o vetor com todas as strings a serem processadas.
+    cout << endl;
     for (int i = 0; i < input_string.size(); i++)
     {
-        cout << "String: " << input_string[i] << endl;
         Str_dividida str;
         str.str = input_string[i];
-
+        cout << "String: " << str.str << endl;
+        // Percorre a string.
         while (input_string[i].size() > 0)
         {
-            cont = 0;
             for (int j = 0; j < tagsValidas.size(); j++)
             {
-                // cout << "TAG: " << tagsValidas[j].nome << endl;
-                is_processed = tagsValidas[j].automato.processaString(input_string[i], &posicao_str);
-                if (is_processed)
+                posicao_str = tagsValidas[j].automato.processaString(input_string[i]);
+                // Armazena o tamanho da sustring processada.
+                tamSubstring.push_back(posicao_str);
+            }
+            // Verificar se todos os elementos do vetor sao iguais a -1.
+            str_isValida = false;
+            for (int j = 0; j < tamSubstring.size(); j++)
+            {
+                if (tamSubstring[j] != -1)
                 {
-                    cont++;
-                    auto it = find(exp_aceitas.begin(), exp_aceitas.end(), tagsValidas[j].nome);
-                    if (it == exp_aceitas.end())
-                        exp_aceitas.push_back(tagsValidas[j].nome);
-                    // cout << tagsValidas[j].nome << " " << endl;
+                    str_isValida = true;
                     break;
                 }
             }
-            // Nenhuma expressao validou aquele inicio da string.
-            if (cont == 0)
-                posicao_str++;
-            // cout << input_string[i] << endl;
-            // cout << posicao_str << endl;
-            input_string[i].erase(0, posicao_str);
-            posicao_str = 0;
-            // cout << input_string[i] << endl;
-            // cout << "Tamanho " << input_string[i].size() << endl;
+            if (!str_isValida)
+            {
+                cout << "[WARNING] Nenhum automato em memoria processa a string " << str.str << endl;
+                tags_aceitas.clear();
+                break;
+            }
+            else
+            {
+                //  Verificar qual foi a maior substring processada.
+                int maior = 0;
+                for (int j = 1; j < tamSubstring.size(); j++)
+                {
+                    if (tamSubstring[j] > tamSubstring[maior])
+                        maior = j;
+                }
+                // Variavel recebe tamanho da maior substring processada.
+                posicao_str = tamSubstring[maior];
+                tamSubstring.clear();
+                // Para remover parte da string ja processada(quando automato processa apenas um caracter).
+                if (posicao_str == 0)
+                    posicao_str++;
+                // Salva apenas a tag que processou uma maior substring.
+                tags_aceitas.push_back(tagsValidas[maior].nome);
+                // Remove da string parte ja validada pelo automato.
+                input_string[i].erase(0, posicao_str);
+                posicao_str = 0;
+            }
         }
-        if (exp_aceitas.empty())
-        {
-            cout << "[INFO] Nenhum automato em memoria processa a string " << input_string[i] << endl;
-            break;
-        }
-
-        str.tags = exp_aceitas;
+        // Salva a string e suas tags apos o processamento.
+        str.tags = tags_aceitas;
         strs_div.push_back(str);
 
-        imprimeExpAceitas(exp_aceitas);
-        exp_aceitas.clear();
+        // Imprime apenas se string foi processada completamente.
+        if (!tags_aceitas.empty())
+        {
+            imprimeExpAceitas(tags_aceitas);
+        }
+        tags_aceitas.clear();
     }
     return strs_div;
 }
@@ -507,13 +489,62 @@ void listarAutomatos(vector<Tag> tags)
         cout << ")" << endl;
     }
 }
+//
+void listaTags(vector<Tag> tags)
+{
+    if (!tags.empty())
+    {
+        cout << endl;
+        for (vector<Tag>::iterator it = tags.begin(); it != tags.end(); it++)
+            cout << it->nome << ": " << it->expressao << endl;
+    }
+    else
+        cout << "[INFO] Nenhuma definicao de tag foi carregada. Execute o comando :c ou :e para carrega-las. " << endl;
+}
+// Salva tags validas em arquivo.
+void salvarTags(vector<Tag> tags, string output_file)
+{
+    if (!tags.empty())
+    {
+        escreveArquivoTags(output_file, tags);
+    }
+    else
+    {
+        cout << "[INFO] Nenhuma definicao de tag foi carregada. Execute o comando :c ou :e para carrega-las. " << endl;
+    }
+}
+
+vector<string> trataDadosEntrada(vector<string> aux, string input, int *funcao)
+{
+    // Dividindo a string opcao.
+    string delimiter = " ";
+    size_t pos;
+
+    while ((pos = input.find(delimiter)) != string::npos)
+    {
+        aux.push_back(input.substr(0, pos));
+        input.erase(0, pos + delimiter.length());
+    }
+    aux.push_back(input);
+
+    // Retornar 1 se for tag e 0 funcionalidade.
+    if (aux[0].size() == 2 && aux[0].at(0) == ':')
+        *funcao = 0;
+    else if (aux[0].back() == ':')
+        *funcao = 1;
+    else
+    {
+        cout << "[ERROR] Comando invalido." << endl;
+        exit(1);
+    }
+    return aux;
+}
 
 void menu()
 {
     cout << endl;
     cout << ":d -> Dividir em tags a string do arquivo informado" << endl;
     cout << ":c -> Carregar um arquivo com definicoes de tags" << endl;
-    cout << ":e -> Definir tags" << endl;
     cout << ":o -> Especificar o caminho do arquivo de saida para a divisao em tags" << endl;
     cout << ":p -> Realizar a divisao em tags da entrada informada" << endl;
     cout << ":a -> Listar as definicoes formais dos automatos em memoria" << endl;
@@ -526,10 +557,12 @@ int main()
 {
     string opcao;
 
-    // Posicao 0 do vetor aux armazena funcionalidade.
+    // CASO1: Posicao 0 do vetor aux armazena funcionalidade.
     // Posicao 1 (quando existe) armazena nome de arquivo ou string.
+    // CASO2: Posicao 0 do vetor aux armazena nome da tag.
+    // Posicao 1 armazana expressao.
     vector<string> aux;
-    string delimiter = " ";
+    int tipo_func = 0;
 
     // Vetor de Tags quer armazena tags validas.
     vector<Tag> tagsValidas;
@@ -551,85 +584,72 @@ int main()
         cout << endl;
         getline(cin, opcao);
 
-        // Dividindo a string opcao.
-        size_t pos;
+        // Se for 1 e tag, se for 0 funcionalidade.
+        aux = trataDadosEntrada(aux, opcao, &tipo_func);
 
-        while ((pos = opcao.find(delimiter)) != string::npos)
+        if (tipo_func == 1)
         {
-            aux.push_back(opcao.substr(0, pos));
-            opcao.erase(0, pos + delimiter.length());
-        }
-        aux.push_back(opcao);
-        opcao = "";
-
-        // Tratando erros de entrada.
-        // Verifica se opcao foi passada por parametro no formato ":x".
-        if (aux[0].size() != 2 && aux[0].at(0) != ':')
-        {
-            cout << "[ERROR] Erro no formato do comando de entrada." << endl;
-            exit(1);
-        }
-
-        // Verifica se usuario passou 2 parametro de entrada.
-        // Algumas opcoes sao excecao por terem apenas 1 parametro.
-        if (aux[0] != ":q" && aux[0] != ":l" && aux[0] != ":a" && aux[0] != ":e")
-        {
-            if (aux.size() != 2)
-            {
-                cout << "[ERROR] Dados de entrada incorretos." << endl;
-                exit(1);
-            }
-        }
-
-        switch (aux[0].at(1))
-        {
-        case 'd':
-            input_string = leArquivo(aux[1]);
-            strs_dividida = processaString(tagsValidas, input_string);
-            input_string.clear();
-            break;
-        case 'c':
-            input_tags = leArquivo(aux[1]);
-            // Funcao de dividir chama a de validar a tag.
-            temp.clear();
+            input_tags.push_back(opcao);
             temp = divideTag(input_tags, tagsValidas);
             tagsValidas = concatenaVetores(temp, tagsValidas);
-            break;
-        case 'e':
-            //TODO:: Lembrar e retirar os testes
             temp.clear();
-            cout << "A" << endl;
-            temp = lerTagsTerminal(tagsValidas);
-            cout << "B" << endl;
-            tagsValidas = concatenaVetores(temp, tagsValidas);
-            cout << "C" << endl;
-            break;
-        case 'o':
-            escreveArquivoStrings(aux[1], strs_dividida);
-            break;
-        case 'p':
-            input_string.push_back(aux[1]);
-            strs_dividida = processaString(tagsValidas, input_string);
-            input_string.clear();
-            break;
-        case 'a':
-            listarAutomatos(tagsValidas);
-            break;
-        case 'l':
-            // Lista todas as definicoes das tags validas.
-            listaTags(tagsValidas);
-            break;
-        case 's':
-            salvarTags(tagsValidas, aux[1]);
-            break;
-        case 'q':
-            cout << "[INFO] Encerrando Programa." << endl;
-            break;
-        default:
-            cout << "[WARNING] Opcao Invalida." << endl;
-            break;
+            input_tags.clear();
         }
-        aux.clear();
+        else
+        {
+            // Verifica se usuario passou 2 parametro de entrada.
+            // Algumas opcoes sao excecao por terem apenas 1 parametro.
+            if (aux[0] == ":d" || aux[0] == ":c" || aux[0] == ":o" || aux[0] == ":p" || aux[0] == ":s")
+            {
+                if (aux.size() != 2)
+                {
+                    cout << "[ERROR] Dados de entrada incorretos, espera-se 2 argumentos." << endl;
+                    exit(1);
+                }
+            }
 
+            switch (aux[0].at(1))
+            {
+            case 'd':
+                input_string = leArquivo(aux[1]);
+                strs_dividida = processaString(tagsValidas, input_string);
+                input_string.clear();
+                break;
+            case 'c':
+                input_tags = leArquivo(aux[1]);
+                // Funcao de dividir chama a de validar a tag.
+                temp = divideTag(input_tags, tagsValidas);
+                tagsValidas = concatenaVetores(temp, tagsValidas);
+                input_tags.clear();
+                temp.clear();
+                break;
+            case 'o':
+                escreveArquivoStrings(aux[1], strs_dividida);
+                break;
+            case 'p':
+                input_string.push_back(aux[1]);
+                strs_dividida = processaString(tagsValidas, input_string);
+                input_string.clear();
+                break;
+            case 'a':
+                listarAutomatos(tagsValidas);
+                break;
+            case 'l':
+                // Lista todas as definicoes das tags validas.
+                listaTags(tagsValidas);
+                break;
+            case 's':
+                salvarTags(tagsValidas, aux[1]);
+                break;
+            case 'q':
+                cout << "[INFO] Encerrando Programa." << endl;
+                break;
+            default:
+                cout << "[ERROR] Opcao Invalida." << endl;
+                break;
+            }
+        }
+        opcao = "";
+        aux.clear();
     } while (aux[0] != ":q");
 }

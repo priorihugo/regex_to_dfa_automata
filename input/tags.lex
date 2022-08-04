@@ -4,3 +4,6 @@ VAR: ab+c+x+
 VAR: ab+c+
 CHAR: C.C+*
 SPACE:  
+TAG1: ab+
+TAG2: ab+*
+TAG3: c

@@ -464,7 +464,7 @@ void Automato::reduzParaAFD(string name_tag)
 
     aux->criaVisualizacao(name_tag);
 }
-bool Automato::processaString(string data, int *posicao)
+int Automato::processaString(string data)
 {
     // passar a string para todos os automatos em menoria. (1 exp => 1 automato)
     auto it = this->EstadosIniciais.begin();
@@ -472,6 +472,8 @@ bool Automato::processaString(string data, int *posicao)
     int charAtual = 0;
     bool continua = true;
     bool aux = false;
+    // armazena tamanho da substring processada.
+    int posicao = 0;
     while (charAtual < data.size() && estadoAtual != nullptr)
     {
         // itera pelo estado atual
@@ -485,11 +487,12 @@ bool Automato::processaString(string data, int *posicao)
                 charAtual++;
                 aux = true;
                 // marca em que posicao da string o automato validou
-                *posicao += 1;
-                if (find(this->EstadosFinais.begin(), this->EstadosFinais.end(), estadoAtual) != this->EstadosFinais.end())
-                {
-                    return true;
-                }
+                // if (find(this->EstadosFinais.begin(), this->EstadosFinais.end(), estadoAtual) != this->EstadosFinais.end())
+                // {
+                //     cout << "posicaooo: " << *posicao << endl;
+                //     return;
+                // }
+                posicao++;
                 break;
             }
         }
@@ -497,10 +500,11 @@ bool Automato::processaString(string data, int *posicao)
         if (!aux)
         {
             // cout << "Automato nao aceita a string." << endl;
-            return false;
+            posicao = -1;
+            return posicao;
         }
     }
-    return true;
+    return posicao;
 }
 void Automato::nomeiaEstados()
 {

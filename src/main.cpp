@@ -74,7 +74,7 @@ void escreveArquivoTags(string arquivo, vector<Tag> tags)
         output_file << it->nome << ": " << it->expressao << endl;
     }
 
-    cout << "[INFO] Tags salvas no arquivo." << arquivo << endl;
+    cout << "[INFO] Tags salvas no arquivo " << arquivo << endl;
 
     // Fecha arquivo.
     output_file.close();
@@ -353,9 +353,8 @@ void imprimeExpAceitas(vector<string> exp_aceitas)
     cout << endl;
 }
 
-vector<Str_dividida> processaString(vector<Tag> tagsValidas, vector<string> input_string)
+vector<Str_dividida> processaString(vector<Tag> tagsValidas, vector<string> input_string, vector<Str_dividida> strs_div)
 {
-    vector<Str_dividida> strs_div;
     if (tagsValidas.empty())
     {
         cout << "[INFO] Nenhuma definicao de tag foi carregada. Execute o comando :c ou :e para carrega-las. " << endl;
@@ -590,9 +589,7 @@ int main()
         if (tipo_func == 1)
         {
             input_tags.push_back(opcao);
-            temp = divideTag(input_tags, tagsValidas);
-            tagsValidas = concatenaVetores(temp, tagsValidas);
-            temp.clear();
+            tagsValidas = divideTag(input_tags, tagsValidas);
             input_tags.clear();
         }
         else
@@ -612,23 +609,21 @@ int main()
             {
             case 'd':
                 input_string = leArquivo(aux[1]);
-                strs_dividida = processaString(tagsValidas, input_string);
+                strs_dividida = processaString(tagsValidas, input_string, strs_dividida);
                 input_string.clear();
                 break;
             case 'c':
                 input_tags = leArquivo(aux[1]);
                 // Funcao de dividir chama a de validar a tag.
-                temp = divideTag(input_tags, tagsValidas);
-                tagsValidas = concatenaVetores(temp, tagsValidas);
+                tagsValidas = divideTag(input_tags, tagsValidas);
                 input_tags.clear();
-                temp.clear();
                 break;
             case 'o':
                 escreveArquivoStrings(aux[1], strs_dividida);
                 break;
             case 'p':
                 input_string.push_back(aux[1]);
-                strs_dividida = processaString(tagsValidas, input_string);
+                strs_dividida = processaString(tagsValidas, input_string, strs_dividida);
                 input_string.clear();
                 break;
             case 'a':

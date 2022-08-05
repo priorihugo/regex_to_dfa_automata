@@ -122,25 +122,6 @@ void escreveArquivoStrings(string arquivo, vector<Str_dividida> str)
     output_file.close();
 }
 
-vector<Tag> concatenaVetores(vector<Tag> tags, vector<Tag> tagsValidas)
-{
-    bool aux = false;
-    for (int i = 0; i < tags.size(); i++)
-    {
-        // for (int j = 0; j < tagsValidas.size(); j++)
-        // {
-        //     if (tags[i].nome == tagsValidas[j].nome)
-        //     {
-        //         aux = true;
-        //         break;
-        //     }
-        // }
-        // if (!aux)
-        tagsValidas.push_back(tags[i]);
-    }
-    return tagsValidas;
-}
-
 bool validaExpressao(string exp)
 {
     vector<string> heap;
@@ -462,12 +443,12 @@ void listarAutomatos(vector<Tag> tags)
         return;
     }
 
-    cout << "[INFO] Funcao transicao esta sendo representada pelo arquivo de saida, no diretorio output, da seguinte forma : \"nome da tag.png ou .dot\""
+    cout << "[INFO] Funcao transicao esta sendo representada pelo arquivo de saida \"nome da tag\".png ou .dot"
          << endl;
 
     for (int i = 0; i < tags.size(); i++)
     {
-        cout << tags[i].nome << "=(";
+        cout << tags[i].nome << " = (";
 
         // Imprime estados do automato.
         tags[i].automato.imprimeSetFormal(tags[i].automato.getEstados());
@@ -475,9 +456,14 @@ void listarAutomatos(vector<Tag> tags)
         // Imprime alfabeto.
         vector<char> alfabeto = encontrarAlfabeto(tags[i].expressao);
         cout << "{";
+        int cont = 0;
         for (int j = 0; j < alfabeto.size(); j++)
         {
-            cout << alfabeto[j] << " ";
+            if (cont == alfabeto.size() - 1)
+                cout << alfabeto[j];
+            else
+                cout << alfabeto[j] << " ";
+            cont++;
         }
         cout << "}, ";
         // Imprime estado inicial.

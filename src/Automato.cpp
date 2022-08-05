@@ -289,10 +289,14 @@ void imprimeset(set<Estado *> &s)
 }
 void Automato::imprimeSetFormal(set<Estado *> s)
 {
+    int cont = 0;
     cout << "{";
     for (auto it = s.begin(); it != s.end(); it++)
     {
-        cout << (*it)->id << " ";
+        if(cont == s.size() - 1)
+            cout << (*it)->id;
+        else cout << (*it)->id << " ";
+        cont++;
     }
     cout << "}";
 }
